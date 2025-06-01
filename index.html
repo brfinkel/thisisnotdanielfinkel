@@ -1,11 +1,10 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Daniel Finkel</title>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400&display=swap" rel="stylesheet" />
   <style>
     html, body {
       margin: 0;
@@ -15,7 +14,7 @@
       justify-content: center;
       align-items: center;
       background: linear-gradient(270deg, #fbc2eb, #a6c1ee, #ffd6d6, #e0c3fc);
-      background-size: 800% 800%;
+      background-size: 400% 400%;
       animation: gradientShift 30s ease infinite;
       text-align: center;
       padding: 2rem;
@@ -39,68 +38,10 @@
       font-weight: 400;
       max-width: 600px;
       line-height: 1.6;
-      color: rgba(34, 34, 34, 0.8);
       animation: fadeIn 3s ease forwards;
       z-index: 5;
       position: relative;
       mix-blend-mode: difference;
-    }
 
-    .grain {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      background: repeating-radial-gradient(circle, rgba(255,255,255,0.02) 0px, rgba(0,0,0,0.1) 1px, transparent 2px);
-      opacity: 0.45;
-      z-index: 1;
-    }
-
-    canvas#prism {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 3;
-      pointer-events: none;
-      mix-blend-mode: screen;
-    }
-  </style>
-</head>
-<body>
-  <div class="grain"></div>
-  <canvas id="prism"></canvas>
-  <h1>Daniel Finkel is a writer from the Philadelphia area.</h1>
-
-  <script>
-    const canvas = document.getElementById('prism');
-    const ctx = canvas.getContext('2d');
-    let width, height;
-
-    function resizeCanvas() {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
-    }
-
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
-
-    document.addEventListener('mousemove', (e) => {
-      ctx.clearRect(0, 0, width, height);
-      const x = e.clientX;
-      const y = e.clientY;
-
-      const gradient = ctx.createRadialGradient(x, y, 0, x, y, 200);
-      gradient.addColorStop(0, 'rgba(255, 255, 255, 0.15)');
-      gradient.addColorStop(0.5, 'rgba(200, 200, 255, 0.05)');
-      gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, width, height);
-    });
-  </script>
-</body>
-</html>
+      /* Inverted gradient text */
+      background: linear-gradient(270deg, #042135, #5e4a80, #2c212a, #381b49);
