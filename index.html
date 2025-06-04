@@ -30,9 +30,8 @@
     h1 {
       font-size: clamp(1.1rem, 3.5vw, 2.2rem);
       font-weight: 400;
-      /* Adjusted width and max-width to allow text to go closer to the edges */
-      width: clamp(80vw, 85vw, 1000px); /* Allows growth up to 1000px dynamically */
-      max-width: 1000px; /* Hard cap for very large screens, now much wider */
+      width: clamp(80vw, 85vw, 1000px);
+      max-width: 1000px;
       line-height: 1.6;
       text-align: left;
       background: linear-gradient(270deg, #111, #fff, #111);
@@ -64,9 +63,6 @@
       }
     }
 
-    .body-italic {
-      font-style: italic;
-    }
     .grain {
       position: absolute;
       top: 0; left: 0;
@@ -75,9 +71,30 @@
       pointer-events: none;
       background-image: url('https://grainy-gradients.vercel.app/noise.png');
       background-size: 300px;
-      opacity: 2.4;
+      opacity: 0.4;
       z-index: 20;
       mix-blend-mode: multiply;
+      /* --- NEW: Film Grain Animation --- */
+      animation: grainAnimation 1s linear infinite; /* 1s duration, linear, repeats infinitely */
+    }
+
+    @keyframes grainAnimation {
+      0% { background-position: 0 0; }
+      10% { background-position: 1px 1px; }
+      20% { background-position: -1px -1px; }
+      30% { background-position: 1px 0; }
+      40% { background-position: -1px 1px; }
+      50% { background-position: 0 -1px; }
+      60% { background-position: 1px -1px; }
+      70% { background-position: -1px 0; }
+      80% { background-position: 0 1px; }
+      90% { background-position: -1px -1px; }
+      100% { background-position: 0 0; }
+    }
+    /* --- END NEW --- */
+
+    .body-italic {
+      font-style: italic;
     }
     .contact-text {
       position: fixed;
