@@ -16,13 +16,11 @@
       background: radial-gradient(circle at center, #fbc2eb, #a6c1ee, #ffd6d6, #e0c3fc);
       background-size: 500% 500%;
       background-attachment: fixed;
-      animation: gradientShift 40s ease infinite;
+      animation: gradientShift 40s ease infinite, pageJitter 0.1s steps(2) infinite;
       overflow: hidden;
       min-height: 100vh;
       min-width: 100vw;
       position: relative;
-      /* Removed: filter: sepia(30%) hue-rotate(5deg) saturate(150%); */
-      animation: gradientShift 40s ease infinite, pageJitter 0.1s steps(2) infinite;
     }
 
     @keyframes gradientShift {
@@ -51,7 +49,8 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       animation: gradientShift 15s ease infinite, textSettle 1.5s ease-out forwards;
-      mix-blend-mode: difference;
+      /* --- FIXED: Removed mix-blend-mode: difference; --- */
+      /* mix-blend-mode: difference; */
       word-break: break-word;
       overflow-wrap: break-word;
       margin: 0;
@@ -121,31 +120,3 @@
       font-family: 'Fraunces', serif;
       pointer-events: auto;
       user-select: text;
-      gap: 16px;
-    }
-    .contact-text a {
-      color: #222;
-      text-decoration: underline;
-      font-size: 0.8rem;
-      transition: color 0.15s;
-      opacity: 0.85;
-      font-family: 'Fraunces', serif;
-    }
-    .contact-text a:hover {
-      color: #6c63ff;
-    }
-    @media (max-width: 700px) {
-      h1 {
-        font-size: clamp(1rem, 4.5vw, 1.4rem);
-        width: clamp(90vw, 95vw, 97vw);
-        max-width: 98vw;
-        padding: 0 2vw;
-      }
-      .contact-text {
-        font-size: 0.70rem;
-        bottom: 8px;
-        right: 8px;
-        gap: 10px;
-      }
-      .contact-text a {
-        font-size
