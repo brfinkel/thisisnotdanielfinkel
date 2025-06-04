@@ -18,6 +18,9 @@
       background-attachment: fixed;
       animation: gradientShift 40s ease infinite;
       overflow: hidden;
+      min-height: 100vh;
+      min-width: 100vw;
+      position: relative;
     }
     @keyframes gradientShift {
       0% { background-position: 0% 50%; }
@@ -25,24 +28,27 @@
       100% { background-position: 0% 50%; }
     }
     h1 {
-      font-size: 2rem;
+      font-size: clamp(1.1rem, 4.5vw, 2rem);
       font-weight: 400;
       max-width: 600px;
+      width: 85vw;
       line-height: 1.6;
-      text-align: center;
-      animation: fadeIn 3s ease forwards;
-      position: relative;
-      mix-blend-mode: difference;
+      text-align: left;
       background: linear-gradient(270deg, #111, #fff, #111);
       background-size: 400% 400%;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       animation: gradientShift 15s ease infinite;
+      mix-blend-mode: difference;
+      word-break: break-word;
+      overflow-wrap: break-word;
+      margin: 0;
+      font-family: 'Fraunces', serif;
       z-index: 5;
+      position: relative;
     }
-    @keyframes fadeIn {
-      0% { opacity: 0; transform: translateY(10px); }
-      100% { opacity: 1; transform: translateY(0); }
+    .body-italic {
+      font-style: italic;
     }
     .grain {
       position: absolute;
@@ -56,10 +62,61 @@
       z-index: 20;
       mix-blend-mode: multiply;
     }
+    .contact-text {
+      position: fixed;
+      right: 18px;
+      bottom: 12px;
+      font-size: 0.8rem;
+      color: #222;
+      z-index: 30;
+      opacity: 0.72;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      font-family: 'Fraunces', serif;
+      pointer-events: auto;
+      user-select: text;
+      gap: 16px;
+    }
+    .contact-text a {
+      color: #222;
+      text-decoration: underline;
+      font-size: 0.8rem;
+      transition: color 0.15s;
+      opacity: 0.85;
+      font-family: 'Fraunces', serif;
+    }
+    .contact-text a:hover {
+      color: #6c63ff;
+    }
+    @media (max-width: 700px) {
+      h1 {
+        font-size: clamp(1rem, 6vw, 1.2rem);
+        max-width: 98vw;
+        width: 97vw;
+        padding: 0 2vw;
+      }
+      .contact-text {
+        font-size: 0.70rem;
+        bottom: 8px;
+        right: 8px;
+        gap: 10px;
+      }
+      .contact-text a {
+        font-size: 0.70rem;
+      }
+    }
   </style>
 </head>
 <body>
-  <h1>Daniel Finkel is a writer from Philadelphia.  A 2025-27 Stegner Fellow, former editor-in-chief of The Penn Review, and co-producer on a forthcoming feature horror film, he is currently working on a novel about undercover spies in a union election.</h1>
+  <h1>
+    Daniel Finkel is a writer from Philadelphia. A 2025-27 Stegner Fellow at Stanford and former editor-in-chief of
+    <span class="body-italic">The Penn Review</span>, he is currently working on a novel about undercover spies in a union election.
+  </h1>
   <div class="grain"></div>
+  <div class="contact-text">
+    <a href="https://instagram.com/d.s.finkel" target="_blank">Instagram</a>
+    <a href="mailto:danielsf@stanford.edu">email</a>
+  </div>
 </body>
 </html>
