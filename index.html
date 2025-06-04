@@ -28,16 +28,13 @@
       100% { background-position: 0% 50%; }
     }
     h1 {
-      /* Refined font-size and width for smoother scaling */
-      font-size: clamp(1.1rem, 4vw + 1rem, 2rem); /* Adjusted fluid value for smoother transition */
+      /* Increased vw value for font-size for more dynamic scaling */
+      font-size: clamp(1.2rem, 6vw, 2.8rem); /* Adjusted values for more noticeable scaling */
       font-weight: 400;
-      max-width: 600px; /* Limits the maximum width */
-      width: 90%; /* Use a percentage for width, allowing it to scale with viewport */
-      padding: 0 10px; /* Add slight padding to prevent text from touching edges on very small screens */
-      box-sizing: border-box; /* Ensures padding is included in the width */
-
+      /* Adjusted clamp values for width for more noticeable scaling */
+      width: clamp(80vw, 88vw, 650px); /* Adjusted values */
       line-height: 1.6;
-      text-align: left; /* Text remains left-justified within the h1 box */
+      text-align: left; /* Ensures text is left-justified within the h1 block */
       background: linear-gradient(270deg, #111, #fff, #111);
       background-size: 400% 400%;
       -webkit-background-clip: text;
@@ -46,13 +43,12 @@
       mix-blend-mode: difference;
       word-break: break-word;
       overflow-wrap: break-word;
-      margin: 0; /* Remove default margin that could affect centering */
+      margin: 0; /* Remove default margin to let flexbox handle centering fully */
       font-family: 'Fraunces', serif;
       z-index: 5;
-      position: relative; /* Needed for z-index and potentially other positioning effects */
+      position: relative;
     }
 
-    /* New animation for text settling */
     @keyframes textSettle {
       0% {
         transform: scale(1.05); /* Start slightly larger */
@@ -107,16 +103,11 @@
       color: #6c63ff;
     }
     @media (max-width: 700px) {
-      /* Remove or adjust media query for h1 font-size and width */
-      /* The clamp() function and percentage width should handle this responsively */
       h1 {
-         /* These values might still be useful if you need very specific behavior
-            at small screens, but often clamp() handles it well.
-            If you uncomment, ensure they blend smoothly with your clamp. */
-        /* font-size: clamp(1rem, 6vw, 1.2rem); */
-        /* max-width: 98vw; */
-        /* width: 97vw; */
-        /* padding: 0 2vw; */
+        /* Adjusted clamp values for smaller screens */
+        font-size: clamp(1rem, 7vw, 1.5rem); /* Increased vw, slightly larger max */
+        width: clamp(88vw, 92vw, 95vw); /* Adjusted values for smaller screens */
+        padding: 0 2vw;
       }
       .contact-text {
         font-size: 0.70rem;
