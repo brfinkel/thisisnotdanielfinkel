@@ -13,24 +13,16 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      background: linear-gradient(270deg, #fbc2eb, #a6c1ee, #ffd6d6, #e0c3fc);
-      background-size: 400% 400%;
-      animation: gradientShift 30s ease infinite;
-      text-align: center;
-      padding: 2rem;
-      position: relative;
+      background: radial-gradient(circle at center, #fbc2eb, #a6c1ee, #ffd6d6, #e0c3fc);
+      background-size: 300% 300%;
+      animation: backgroundGradientShift 30s ease infinite; /* Changed animation name */
       overflow: hidden;
     }
 
-    @keyframes gradientShift {
+    @keyframes backgroundGradientShift { /* Changed keyframe name */
       0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
-    }
-
-    @keyframes fadeIn {
-      0% { opacity: 0; transform: translateY(10px); }
-      100% { opacity: 0.8; transform: translateY(0); }
     }
 
     h1 {
@@ -38,10 +30,39 @@
       font-weight: 400;
       max-width: 600px;
       line-height: 1.6;
+      text-align: center;
       animation: fadeIn 3s ease forwards;
-      z-index: 5;
       position: relative;
       mix-blend-mode: difference;
+      background: linear-gradient(270deg, #111, #fff, #111);
+      background-size: 400% 400%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      /* Removed animation: gradientShift 15s ease infinite; from here */
+      z-index: 5;
+    }
 
-      /* Inverted gradient text */
-      background: linear-gradient(270deg, #042135, #5e4a80, #2c212a, #381b49);
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: translateY(10px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .grain {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      background-image: url('https://grainy-gradients.vercel.app/noise.png');
+      background-size: 300px;
+      opacity: 0.4;
+      z-index: 20;
+      mix-blend-mode: multiply;
+    }
+  </style>
+</head>
+<body>
+  <h1>Daniel Finkel is a writer from the Philadelphia area.</h1>
+  <div class="grain"></div>
+</body>
+</html>
