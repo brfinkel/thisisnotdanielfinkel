@@ -30,8 +30,9 @@
     h1 {
       font-size: clamp(1.1rem, 3.5vw, 2.2rem);
       font-weight: 400;
-      width: clamp(80vw, 85vw, 600px);
-      max-width: 600px;
+      /* Adjusted width and max-width to allow text to go closer to the edges */
+      width: clamp(80vw, 85vw, 1000px); /* Allows growth up to 1000px dynamically */
+      max-width: 1000px; /* Hard cap for very large screens, now much wider */
       line-height: 1.6;
       text-align: left;
       background: linear-gradient(270deg, #111, #fff, #111);
@@ -48,9 +49,8 @@
       position: relative;
     }
 
-    /* Added style for the new line break span */
     .line-break-span {
-        display: block; /* Makes the span behave like a block-level element, forcing a line break */
+        display: block;
     }
 
     @keyframes textSettle {
