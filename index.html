@@ -11,8 +11,8 @@
       height: 100%;
       font-family: 'Fraunces', serif;
       display: flex;
-      justify-content: center;
-      align-items: center;
+      justify-content: center; /* Centers the h1 horizontally */
+      align-items: center;   /* Centers the h1 vertically */
       background: radial-gradient(circle at center, #fbc2eb, #a6c1ee, #ffd6d6, #e0c3fc);
       background-size: 500% 500%;
       background-attachment: fixed;
@@ -28,24 +28,28 @@
       100% { background-position: 0% 50%; }
     }
     h1 {
-      font-size: clamp(1.1rem, 4.5vw, 2rem);
+      /* Refined font-size and width for smoother scaling */
+      font-size: clamp(1.1rem, 4vw + 1rem, 2rem); /* Adjusted fluid value for smoother transition */
       font-weight: 400;
-      max-width: 600px;
-      width: 85vw;
+      max-width: 600px; /* Limits the maximum width */
+      width: 90%; /* Use a percentage for width, allowing it to scale with viewport */
+      padding: 0 10px; /* Add slight padding to prevent text from touching edges on very small screens */
+      box-sizing: border-box; /* Ensures padding is included in the width */
+
       line-height: 1.6;
-      text-align: left;
+      text-align: left; /* Text remains left-justified within the h1 box */
       background: linear-gradient(270deg, #111, #fff, #111);
       background-size: 400% 400%;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      animation: gradientShift 15s ease infinite, textSettle 1.5s ease-out forwards; /* Added textSettle animation */
+      animation: gradientShift 15s ease infinite, textSettle 1.5s ease-out forwards;
       mix-blend-mode: difference;
       word-break: break-word;
       overflow-wrap: break-word;
-      margin: 0;
+      margin: 0; /* Remove default margin that could affect centering */
       font-family: 'Fraunces', serif;
       z-index: 5;
-      position: relative;
+      position: relative; /* Needed for z-index and potentially other positioning effects */
     }
 
     /* New animation for text settling */
@@ -71,7 +75,7 @@
       pointer-events: none;
       background-image: url('https://grainy-gradients.vercel.app/noise.png');
       background-size: 300px;
-      opacity: 0.4; /* Changed from 2.4, which is likely a typo and makes it too strong */
+      opacity: 0.4;
       z-index: 20;
       mix-blend-mode: multiply;
     }
@@ -103,11 +107,16 @@
       color: #6c63ff;
     }
     @media (max-width: 700px) {
+      /* Remove or adjust media query for h1 font-size and width */
+      /* The clamp() function and percentage width should handle this responsively */
       h1 {
-        font-size: clamp(1rem, 6vw, 1.2rem);
-        max-width: 98vw;
-        width: 97vw;
-        padding: 0 2vw;
+         /* These values might still be useful if you need very specific behavior
+            at small screens, but often clamp() handles it well.
+            If you uncomment, ensure they blend smoothly with your clamp. */
+        /* font-size: clamp(1rem, 6vw, 1.2rem); */
+        /* max-width: 98vw; */
+        /* width: 97vw; */
+        /* padding: 0 2vw; */
       }
       .contact-text {
         font-size: 0.70rem;
