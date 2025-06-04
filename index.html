@@ -16,19 +16,25 @@
       background: radial-gradient(circle at center, #fbc2eb, #a6c1ee, #ffd6d6, #e0c3fc);
       background-size: 500% 500%;
       background-attachment: fixed;
-      animation: gradientShift 40s ease infinite, pageJitter 0.1s steps(2) infinite;
-      overflow: hidden;
+      animation: gradientShift 40s ease infinite;
+      overflow: hidden; /* Keep overflow hidden to prevent scrollbars from jitter */
       min-height: 100vh;
       min-width: 100vw;
       position: relative;
+      /* --- NEW: Global Vintage Color Filter --- */
+      filter: sepia(30%) hue-rotate(5deg) saturate(150%); /* Adjust these values for desired tint/saturation */
+      /* --- NEW: Subtle Page Jitter Animation --- */
+      animation: gradientShift 40s ease infinite, pageJitter 0.1s steps(2) infinite; /* Added pageJitter */
     }
 
+    /* Keep the gradient shift separate if both are applied to body */
     @keyframes gradientShift {
       0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
     }
 
+    /* --- NEW: Page Jitter Keyframes --- */
     @keyframes pageJitter {
       0% { transform: translate(0.5px, 0.5px); }
       25% { transform: translate(-0.5px, 0.5px); }
@@ -36,6 +42,7 @@
       75% { transform: translate(-0.5px, -0.5px); }
       100% { transform: translate(0.5px, 0.5px); }
     }
+    /* --- END NEW --- */
 
     h1 {
       font-size: clamp(1.1rem, 3.5vw, 2.2rem);
@@ -49,8 +56,7 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       animation: gradientShift 15s ease infinite, textSettle 1.5s ease-out forwards;
-      /* --- FIXED: Removed mix-blend-mode: difference; --- */
-      /* mix-blend-mode: difference; */
+      mix-blend-mode: difference;
       word-break: break-word;
       overflow-wrap: break-word;
       margin: 0;
@@ -81,17 +87,19 @@
       height: 100%;
       pointer-events: none;
       background-image: url('https://grainy-gradients.vercel.app/noise.png');
-      background-size: 50px;
-      opacity: 1;
-      filter: contrast(300%) brightness(150%);
+      /* --- MORE INTENSE GRAIN --- */
+      background-size: 50px; /* Even smaller size for much denser grain */
+      opacity: 1; /* Full opacity for maximum presence */
+      filter: contrast(300%) brightness(150%); /* Significantly boost contrast and brightness */
+      /* --- END INTENSE GRAIN --- */
       z-index: 20;
       mix-blend-mode: multiply;
-      animation: grainAnimation 0.5s linear infinite;
+      animation: grainAnimation 0.5s linear infinite; /* Faster grain animation */
     }
 
     @keyframes grainAnimation {
       0% { background-position: 0 0; }
-      10% { background-position: 2px 2px; }
+      10% { background-position: 2px 2px; } /* Increased pixel shifts for more buzz */
       20% { background-position: -2px -2px; }
       30% { background-position: 2px 0; }
       40% { background-position: -2px 2px; }
@@ -113,10 +121,55 @@
       font-size: 0.8rem;
       color: #222;
       z-index: 30;
-      opacity: 0.72;
+      opacity: 0.72; /* This opacity value means it won't be fully affected by the sepia filter on body */
       display: flex;
       flex-direction: row;
       align-items: center;
       font-family: 'Fraunces', serif;
       pointer-events: auto;
       user-select: text;
+      gap: 16px;
+    }
+    .contact-text a {
+      color: #222;
+      text-decoration: underline;
+      font-size: 0.8rem;
+      transition: color 0.15s;
+      opacity: 0.85;
+      font-family: 'Fraunces', serif;
+    }
+    .contact-text a:hover {
+      color: #6c63ff;
+    }
+    @media (max-width: 700px) {
+      h1 {
+        font-size: clamp(1rem, 4.5vw, 1.4rem);
+        width: clamp(90vw, 95vw, 97vw);
+        max-width: 98vw;
+        padding: 0 2vw;
+      }
+      .contact-text {
+        font-size: 0.70rem;
+        bottom: 8px;
+        right: 8px;
+        gap: 10px;
+      }
+      .contact-text a {
+        font-size: 0.70rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>
+    <span class="line-break-span">Daniel Finkel is a writer from Philadelphia.</span>
+    A 2025-27 Stegner Fellow at Stanford and former editor-in-chief of
+    <span class="body-italic">The Penn Review</span>, he is currently working on a novel about undercover spies in a union election.
+  </h1>
+  <div class="grain"></div>
+  <div class="contact-text">
+    <a href="mailto:danielsf@stanford.edu">email</a>
+    <a href="https://instagram.com/d.s.finkel" target="_blank">instagram</a>
+  </div>
+</body>
+</html>
