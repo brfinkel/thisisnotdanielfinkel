@@ -28,19 +28,10 @@
       100% { background-position: 0% 50%; }
     }
     h1 {
-      /* Refined Fluid Font Size:
-         Start small (1.1rem), scale dynamically with 3.5vw, cap at 2.2rem.
-         Adjust 3.5vw to control responsiveness; lower values make it scale slower.
-         This range should keep it dynamic across many typical screen sizes.
-      */
       font-size: clamp(1.1rem, 3.5vw, 2.2rem);
       font-weight: 400;
-      /* Refined Fluid Width:
-         Start at 80vw, scale dynamically with 85vw, cap at 600px.
-         This ensures the text block itself scales smoothly without abrupt changes.
-      */
-      width: clamp(80vw, 85vw, 600px); /* Ensure a minimum width to prevent text squishing too much */
-      max-width: 600px; /* Still keep max-width for very large screens */
+      width: clamp(80vw, 85vw, 600px);
+      max-width: 600px;
       line-height: 1.6;
       text-align: left;
       background: linear-gradient(270deg, #111, #fff, #111);
@@ -55,6 +46,11 @@
       font-family: 'Fraunces', serif;
       z-index: 5;
       position: relative;
+    }
+
+    /* Added style for the new line break span */
+    .line-break-span {
+        display: block; /* Makes the span behave like a block-level element, forcing a line break */
     }
 
     @keyframes textSettle {
@@ -112,8 +108,7 @@
     }
     @media (max-width: 700px) {
       h1 {
-        /* Adjust clamp values for smaller screens, making vw less aggressive */
-        font-size: clamp(1rem, 4.5vw, 1.4rem); /* Adjusted vw and max rem for mobile */
+        font-size: clamp(1rem, 4.5vw, 1.4rem);
         width: clamp(90vw, 95vw, 97vw);
         max-width: 98vw;
         padding: 0 2vw;
@@ -132,12 +127,14 @@
 </head>
 <body>
   <h1>
-    Daniel Finkel is a writer from Philadelphia. 
+    <span class="line-break-span">Daniel Finkel is a writer from Philadelphia.</span>
     A 2025-27 Stegner Fellow at Stanford and former editor-in-chief of
     <span class="body-italic">The Penn Review</span>, he is currently working on a novel about undercover spies in a union election.
   </h1>
   <div class="grain"></div>
   <div class="contact-text">
-    <a href="mailto:danielsf@stanford.edu">Email</a> <a href="https://instagram.com/d.s.finkel" target="_blank">Instagram</a> </div>
+    <a href="mailto:danielsf@stanford.edu">email</a>
+    <a href="https://instagram.com/d.s.finkel" target="_blank">instagram</a>
+  </div>
 </body>
 </html>
