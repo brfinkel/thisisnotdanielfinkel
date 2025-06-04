@@ -70,12 +70,14 @@
       height: 100%;
       pointer-events: none;
       background-image: url('https://grainy-gradients.vercel.app/noise.png');
-      background-size: 300px;
-      opacity: 4.4;
+      /* --- CHANGES FOR MORE NOTICEABLE GRAIN --- */
+      background-size: 100px; /* Smaller size makes grain denser (was 300px) */
+      opacity: 0.8; /* Increased closer to full opacity (was 0.4, 4.8 is interpreted as 1) */
+      filter: contrast(150%) brightness(120%); /* NEW: Boosts visibility of the noise */
+      /* --- END CHANGES --- */
       z-index: 20;
       mix-blend-mode: multiply;
-      /* --- NEW: Film Grain Animation --- */
-      animation: grainAnimation 1s linear infinite; /* 1s duration, linear, repeats infinitely */
+      animation: grainAnimation 1s linear infinite;
     }
 
     @keyframes grainAnimation {
@@ -91,7 +93,6 @@
       90% { background-position: -1px -1px; }
       100% { background-position: 0 0; }
     }
-    /* --- END NEW --- */
 
     .body-italic {
       font-style: italic;
