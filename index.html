@@ -38,7 +38,7 @@
       background-size: 400% 400%;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      animation: gradientShift 15s ease infinite;
+      animation: gradientShift 15s ease infinite, textSettle 1.5s ease-out forwards; /* Added textSettle animation */
       mix-blend-mode: difference;
       word-break: break-word;
       overflow-wrap: break-word;
@@ -47,6 +47,19 @@
       z-index: 5;
       position: relative;
     }
+
+    /* New animation for text settling */
+    @keyframes textSettle {
+      0% {
+        transform: scale(1.05); /* Start slightly larger */
+        opacity: 0; /* Start invisible */
+      }
+      100% {
+        transform: scale(1); /* End at normal size */
+        opacity: 1; /* Fully visible */
+      }
+    }
+
     .body-italic {
       font-style: italic;
     }
@@ -58,7 +71,7 @@
       pointer-events: none;
       background-image: url('https://grainy-gradients.vercel.app/noise.png');
       background-size: 300px;
-      opacity: 2.4;
+      opacity: 0.4; /* Changed from 2.4, which is likely a typo and makes it too strong */
       z-index: 20;
       mix-blend-mode: multiply;
     }
