@@ -14,17 +14,16 @@
       justify-content: center;
       align-items: center;
       background: radial-gradient(circle at center, #fbc2eb, #a6c1ee, #ffd6d6, #e0c3fc);
-      background-size: 300% 300%;
-      animation: backgroundGradientShift 30s ease infinite; /* Changed animation name */
+      background-size: 400% 400%;
+      background-attachment: fixed;
+      animation: gradientShift 30s ease infinite;
       overflow: hidden;
     }
-
-    @keyframes backgroundGradientShift { /* Changed keyframe name */
+    @keyframes gradientShift {
       0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
     }
-
     h1 {
       font-size: 2rem;
       font-weight: 400;
@@ -38,15 +37,13 @@
       background-size: 400% 400%;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      /* Removed animation: gradientShift 15s ease infinite; from here */
+      animation: gradientShift 15s ease infinite;
       z-index: 5;
     }
-
     @keyframes fadeIn {
       0% { opacity: 0; transform: translateY(10px); }
       100% { opacity: 1; transform: translateY(0); }
     }
-
     .grain {
       position: absolute;
       top: 0; left: 0;
