@@ -72,7 +72,8 @@
       --animation-duration-fast: 15s;
       --animation-duration-slow: 40s;
       --text-color: #333; /* Softer dark grey for general text */
-      --link-hover-color: #6c63ff; /* Original link hover color */
+      --link-hover-color-default: #6c63ff; /* Original link hover color as a default */
+      --current-link-hover-color: var(--link-hover-color-default); /* Dynamic variable for link hover color */
       --font-serif: 'Fraunces', serif;
       --font-sans: 'Inter', sans-serif; /* Modern sans-serif font for secondary text */
     }
@@ -162,13 +163,9 @@
       max-width: 1000px;
       line-height: 1.6; /* Generous line height for readability */
       text-align: left;
-      background: var(--primary-gradient); /* Text color from gradient */
-      background-size: 400% 400%; /* Enables gradient animation on text */
-      -webkit-background-clip: text; /* Clip background to text shape (for WebKit) */
-      -webkit-text-fill-color: transparent; /* Make text transparent to show background */
-      background-clip: text; /* Clip background to text shape (standard) */
-      animation: gradientShift var(--animation-duration-fast) ease infinite, textSettle 1.5s ease-out forwards;
-      mix-blend-mode: difference; /* Creates the unique "translucency" effect with background */
+      /* Removed background-clip, -webkit-background-clip, -webkit-text-fill-color, mix-blend-mode */
+      color: var(--text-color); /* Set explicit color for h1 text to ensure visibility */
+      animation: textSettle 1.5s ease-out forwards; /* Only textSettle animation remains */
       word-break: break-word; /* Prevents long words from overflowing */
       overflow-wrap: break-word; /* Handles word wrapping */
       margin: 0; /* Important for correct flex centering */
@@ -204,10 +201,10 @@
       transition: color 0.3s ease; /* Smooth color change on hover */
     }
 
-    /* Subtle hover color for links */
+    /* Subtle hover color for links - now uses the dynamically set CSS variable */
     .body-italic:hover,
     .stegner-link:hover {
-      color: var(--link-hover-color); 
+      color: var(--current-link-hover-color); 
     }
 
     /* Explicitly make body italic elements italic */
@@ -246,7 +243,7 @@
 
     /* Underline retracts when the h1 is no longer hovered */
     h1:not(:hover) .body-italic::after,
-    h1:not(:hover) .stegner-link::after {
+    h1:not(:hover) .stegner-link::after { 
       width: 0%;
       transition-delay: 0.125s; /* Small delay on retract for consistent feel */
     }
@@ -304,7 +301,7 @@
 
     /* Hover effect for contact links: lift, scale, and full opacity */
     .contact-text a:hover {
-      color: var(--link-hover-color); 
+      color: var(--current-link-hover-color); /* Now uses dynamic color */
       transform: translateY(-3px) scale(1.1); /* Lifts up and scales slightly */
       opacity: 1; /* Becomes fully opaque */
     }
@@ -376,7 +373,7 @@
       const primaryColors = [
         'hsl(0, 80%, 55%)',    // Vibrant Red
         'hsl(200, 100%, 40%)', // Intense Blue
-        'hsl(50, 100%, 55%)',  // Vibrant Yellow (more contrast)
+        'hsl(45, 80%, 50%)',  // Richer Golden Yellow
         'hsl(140, 70%, 45%)'   // Lively Green
       ];
       let currentColorIndex = 0; 
@@ -414,6 +411,7 @@
       function activateScreensaver() {
         if (!isMouseOutsideWindow) { // Only activate if not already active
           isMouseOutsideWindow = true;
+          customCursor.style.opacity = '1'; // Make the ball fully opaque in screensaver mode
           // Ensure velocity is set for initial movement
           const minInitialSpeed = 2;
           const maxDesiredSpeed = 5;
@@ -435,7 +433,7 @@
         if (isMouseOutsideWindow) { // Only deactivate if currently active
           isMouseOutsideWindow = false;
           customCursor.style.backgroundColor = 'rgba(0, 0, 0, 0.5)'; // Reset cursor color to default
-          customCursor.style.opacity = '0.5'; // Reset cursor opacity to default
+          customCursor.style.opacity = '0.5'; // Reset cursor opacity to default for non-hover state
 
           // Snap cursor to event position if available (mouse or touch), otherwise last known.
           if (e && (e.clientX !== undefined || (e.touches && e.touches[0] && e.touches[0].clientX !== undefined))) {
@@ -520,7 +518,7 @@
 
       // --- Custom Cursor Positioning Logic (Updates internal X/Y and velocity based on mouse/touch) ---
       function handleMove(e) {
-        clearInactivityTimer(e); // Reset inactivity timer on any movement
+        startInactivityTimer(); // Reset inactivity timer on any movement
         if (!isMouseOutsideWindow) { // Only update if not in screensaver mode
           const clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : lastClientX);
           const clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : lastClientY);
@@ -557,7 +555,7 @@
 
       function handleTouchStart(e) {
         initialTouchY = e.touches[0].clientY;
-        clearInactivityTimer(e); // Reset inactivity timer on touch start
+        startInactivityTimer(); // Reset inactivity timer on touch start
       }
 
       function handleTouchMove(e) {
@@ -615,8 +613,10 @@
 
         allLinks.forEach(link => {
           link.addEventListener('mouseenter', () => {
-            customCursor.style.backgroundColor = primaryColors[currentColorIndex % primaryColors.length];
+            const newColor = primaryColors[currentColorIndex % primaryColors.length];
+            customCursor.style.backgroundColor = newColor;
             customCursor.style.opacity = '1'; 
+            document.documentElement.style.setProperty('--current-link-hover-color', newColor); // Set CSS variable on root
             currentColorIndex++; 
           });
 
@@ -624,13 +624,16 @@
             if (!isMouseOutsideWindow) { // Only revert to default if not in screensaver mode
               customCursor.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
               customCursor.style.opacity = '0.5'; 
+              document.documentElement.style.setProperty('--current-link-hover-color', 'var(--link-hover-color-default)'); // Reset to default
             }
           });
 
           // Add touch equivalents for hover effect
           link.addEventListener('touchstart', () => {
-              customCursor.style.backgroundColor = primaryColors[currentColorIndex % primaryColors.length];
+              const newColor = primaryColors[currentColorIndex % primaryColors.length];
+              customCursor.style.backgroundColor = newColor;
               customCursor.style.opacity = '1'; 
+              document.documentElement.style.setProperty('--current-link-hover-color', newColor); // Set CSS variable on root
               currentColorIndex++; 
           });
 
@@ -638,6 +641,7 @@
               if (!isMouseOutsideWindow) {
                   customCursor.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
                   customCursor.style.opacity = '0.5'; 
+                  document.documentElement.style.setProperty('--current-link-hover-color', 'var(--link-hover-color-default)'); // Reset to default
               }
           });
         });
