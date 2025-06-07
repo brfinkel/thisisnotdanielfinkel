@@ -391,7 +391,7 @@
       
       .contact-text {
         font-size: 0.65rem; 
-        bottom: 40px; /* Adjusted from 8px to 40px */
+        bottom: 80px; /* Adjusted from 40px to 80px */
         right: 8px;
         gap: 8px; 
       }
@@ -673,7 +673,7 @@
       function handleTouchStart(e) {
         if (!hasUserInteracted) {
           customCursor.style.opacity = '1';
-          customCursor.style.visibility = 'visible';
+          customCursor.style.visibility = 'visible'; // Make cursor visible on first touch
           hasUserInteracted = true;
           animationId = requestAnimationFrame(mainAnimationLoop); // Start the animation loop on first interaction
         }
@@ -765,11 +765,9 @@
         // For non-mobile devices, start the screensaver timer immediately
         if (!isMobileDevice) {
             startInactivityTimer();
-        } else {
-            // For mobile, make cursor visible on initial page load but stay in fixed position
-            customCursor.style.opacity = '1';
-            customCursor.style.visibility = 'visible';
-        }
+        } 
+        // For mobile, the cursor starts hidden and becomes visible only on the first touchstart.
+        // No explicit visibility/opacity setting needed here for mobile init, as CSS handles it.
         
         // Add event listeners based on device type
         if (!isMobileDevice) {
