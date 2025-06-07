@@ -205,21 +205,20 @@
     .body-italic,
     .stegner-link {
       position: relative;
-      /* Restored gradient for text fill */
+      /* Apply gradient directly to text */
       background: var(--primary-gradient);
       background-size: 400% 400%;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      /* Restored mix-blend-mode for link color effect */
-      mix-blend-mode: difference; 
+      /* Changed to normal blend mode for consistent appearance regardless of background */
+      mix-blend-mode: normal; 
       animation: gradientShift var(--animation-duration-fast) ease infinite; /* Links animate their own gradient */
 
       text-decoration: none; /* No default underline */
       cursor: default; /* Overridden by global cursor: none */
       transition: color 0.3s ease, opacity 0.3s ease, background 0.3s ease; /* Smooth transition for color, opacity, background */
 
-      /* --- add these two lines below --- */
       padding-left: 2px;
       padding-right: 2px;
       overflow: visible;
@@ -228,12 +227,12 @@
     /* Styles for hover state of specific links: Stegner Fellow and The Penn Review */
     .body-italic:hover,
     .stegner-link:hover {
-      /* On hover, switch to normal blending and solid color for clear visibility */
+      /* On hover, switch to solid color for clear visibility */
       color: var(--current-link-hover-color) !important;
       -webkit-text-fill-color: var(--current-link-hover-color) !important; /* Important for WebKit to get solid fill */
       opacity: 1 !important; /* Ensure full opacity */
       
-      mix-blend-mode: normal !important; /* Crucial to break from parent's blend mode and become solid */
+      mix-blend-mode: normal !important; /* Crucial to ensure solid color is applied */
       background: none !important; /* Remove the gradient background on hover for solid color */
       background-color: transparent !important; /* Ensure no background color on hover */
       
@@ -578,6 +577,9 @@
             lastClientX = customCursor.offsetLeft + (cursorSize / 2);
             lastClientY = customCursor.offsetTop + (cursorSize / 2);
         }
+        // Crucial: Reset autonomous velocities when user takes control
+        autonomousCursorVx = 0;
+        autonomousCursorVy = 0;
       }
 
       // --- Inactivity Timer Management ---
