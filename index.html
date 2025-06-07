@@ -67,10 +67,8 @@
   <style>
     /* CSS Custom Properties for maintainability and easy theming */
     :root {
-      /* Updated primary-gradient with more color stops for smoother transitions */
-      --primary-gradient: linear-gradient(270deg, #333 0%, #666 25%, #999 50%, #ccc 75%, #333 100%);
-      /* Updated background-gradient with more subtle, varied shades for smoother transitions */
-      --background-gradient: radial-gradient(circle at center, #fefefe 0%, #f9f9f9 20%, #f0f0f0 40%, #e8e8e8 60%, #e0e0e0 80%, #d8d8d8 100%);
+      --primary-gradient: linear-gradient(270deg, #333, #ccc, #333); /* Soft grayscale gradient for text */
+      --background-gradient: radial-gradient(circle at center, #fefefe, #e8e8e8, #f0f0f0, #e0e0e0); /* Updated to shades of white */
       --animation-duration-fast: 15s;
       --animation-duration-slow: 40s;
       --text-color: #333; /* Softer dark grey for general text */
@@ -161,15 +159,13 @@
     h1 {
       font-size: clamp(1.1rem, 3.5vw, 2.2rem); /* Responsive font size */
       font-weight: 400;
-      /* Adjusted width for more space and added global padding */
-      width: clamp(80vw, 88vw, 1000px); 
+      width: clamp(80vw, 85vw, 1000px); /* Responsive width with max constraint */
       max-width: 1000px;
       line-height: 1.6; /* Generous line height for readability */
       text-align: left;
       
-      /* Removed mix-blend-mode from h1 to remove overall text transparency */
-      color: var(--text-color); /* Default text color, now solid */
-      
+      /* Main H1 text is now solid, not blended */
+      color: var(--text-color); 
       animation: textSettle 1.5s ease-out forwards;
       
       word-break: break-word; /* Prevents long words from overflowing */
@@ -185,10 +181,6 @@
       -ms-user-select: none; 
       user-select: none; 
       will-change: transform; /* Performance hint for the scroll budging animation */
-
-      /* Add global padding to prevent clipping on all screens */
-      padding-left: max(20px, 4vw);
-      padding-right: max(20px, 4vw);
     }
 
     /* Disable hover transform on h1 as it's not part of the lovefrom.com aesthetic */
@@ -205,40 +197,40 @@
     .body-italic,
     .stegner-link {
       position: relative;
-      /* Apply gradient directly to text */
+      /* By default, these links have the blending effect */
       background: var(--primary-gradient);
       background-size: 400% 400%;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      /* Changed to normal blend mode for consistent appearance regardless of background */
-      mix-blend-mode: normal; 
+      mix-blend-mode: difference; /* This creates the initial blended effect on links */
       animation: gradientShift var(--animation-duration-fast) ease infinite; /* Links animate their own gradient */
-
+      
       text-decoration: none; /* No default underline */
       cursor: default; /* Overridden by global cursor: none */
-      transition: color 0.3s ease, opacity 0.3s ease, background 0.3s ease; /* Smooth transition for color, opacity, background */
-
-      padding-left: 2px;
-      padding-right: 2px;
-      overflow: visible;
+      transition: color 0.3s ease, opacity 0.3s ease, background 0.3s ease; /* Add background to transition for smooth changes */
     }
 
     /* Styles for hover state of specific links: Stegner Fellow and The Penn Review */
     .body-italic:hover,
     .stegner-link:hover {
-      /* On hover, switch to solid color for clear visibility */
+      /* On hover, switch to normal blending and solid color */
       color: var(--current-link-hover-color) !important;
       -webkit-text-fill-color: var(--current-link-hover-color) !important; /* Important for WebKit to get solid fill */
       opacity: 1 !important; /* Ensure full opacity */
       
-      mix-blend-mode: normal !important; /* Crucial to ensure solid color is applied */
+      mix-blend-mode: normal !important; /* Crucial to break from parent's blend mode */
       background: none !important; /* Remove the gradient background on hover for solid color */
       background-color: transparent !important; /* Ensure no background color on hover */
       
       /* Reset clipping to ensure solid color is applied to the entire text area */
       background-clip: border-box !important;
       -webkit-background-clip: border-box !important;
+    }
+
+    /* Explicitly make body italic elements italic */
+    .body-italic {
+      font-style: italic;
     }
 
     /* Shared underline base styles for links (Original behavior tied to h1 hover) */
@@ -259,7 +251,7 @@
       z-index: 1; /* Ensure underline is beneath the solid text */
     }
 
-    /* Underline appears when the entire h1 is hovered on desktop */
+    /* Underline appears when the entire h1 is hovered */
     h1:hover .body-italic::after {
       width: 100%;
       transition-delay: 0.125s; /* Small delay for staggered effect */
@@ -271,7 +263,7 @@
       transition-delay: 0s;
     }
 
-    /* Underline retracts when the h1 is no longer hovered on desktop */
+    /* Underline retracts when the h1 is no longer hovered */
     h1:not(:hover) .body-italic::after,
     h1:not(:hover) .stegner-link::after { 
       width: 0%;
@@ -340,40 +332,16 @@
     @media (max-width: 700px) {
       h1 {
         font-size: clamp(1rem, 4.5vw, 1.4rem);
-        /* Width is adjusted for mobile too, padding is global max(20px, 4vw) */
-        width: clamp(88vw, 92vw, 95vw); 
-        /* Removed padding: 0 max(16px, 4vw); from here, as it's now handled globally */
+        width: clamp(90vw, 95vw, 97vw);
+        max-width: 98vw;
+        padding: 0 2vw;
       }
       
       .contact-text {
         font-size: 0.65rem; 
         bottom: 8px;
-        right: 8px; /* Keep it on the right */
-        left: auto; /* Remove conflicting 'left' property */
-        transform: none; /* Remove conflicting transform */
+        right: 8px;
         gap: 8px; 
-        padding: 0 8px; /* Adjusted padding for better fit on small screens */
-        white-space: nowrap; /* Prevent wrapping */
-      }
-
-      /* On mobile, links are solid colored and always underlined */
-      .body-italic,
-      .stegner-link {
-        mix-blend-mode: normal; /* Force normal blend mode on mobile for stability */
-        background: none; /* Remove gradient background */
-        background-color: transparent; /* Ensure no background color */
-        -webkit-background-clip: border-box; /* Reset clipping */
-        background-clip: border-box; /* Reset clipping */
-        color: var(--text-color); /* Force a solid default text color on mobile */
-        -webkit-text-fill-color: var(--text-color); /* For WebKit browsers */
-      }
-      
-      /* FOR MOBILE: Force underline to always be visible for links */
-      .body-italic::after,
-      .stegner-link::after {
-        width: 100%; /* Always show underline on mobile */
-        opacity: 0.5; /* Keep opacity consistent with desktop underline */
-        transition-delay: 0s; /* No delay on mobile */
       }
       
       .contact-text a {
@@ -430,22 +398,21 @@
       const primaryColors = [
         'hsl(0, 80%, 55%)',    // Vibrant Red
         'hsl(200, 100%, 40%)', // Intense Blue
-        'hsl(45, 80%, 50%)',   // Richer Golden Yellow
+        'hsl(45, 80%, 50%)',  // Richer Golden Yellow
         'hsl(140, 70%, 45%)'   // Lively Green
       ];
       let currentColorIndex = 0; 
 
-      // Cursor state variables for autonomous movement
+      // Cursor state variables
       let isBallAutonomous = false; // true when ball is bouncing on its own, false when user is interacting
-      let autonomousCursorX = window.innerWidth / 2; // Position for autonomous movement
-      let autonomousCursorY = window.innerHeight / 2; // Position for autonomous movement
-      let autonomousCursorVx = 0; // Velocity for autonomous movement
-      let autonomousCursorVy = 0; // Velocity for autonomous movement
+      let cursorX = window.innerWidth / 2; 
+      let cursorY = window.innerHeight / 2; 
+      let cursorVx = 0; 
+      let cursorVy = 0; 
       let cursorSize = 0; 
       
-      // Last known client X/Y for direct following when not autonomous
-      let lastClientX = window.innerWidth / 2; 
-      let lastClientY = window.innerHeight / 2; 
+      let lastClientX = cursorX; 
+      let lastClientY = cursorY; 
 
       const screensaverDamping = 0.7; 
 
@@ -460,32 +427,32 @@
       function mainAnimationLoop() {
         if (isBallAutonomous) {
           // Autonomous Mode: Update position and handle bouncing
-          autonomousCursorX += autonomousCursorVx;
-          autonomousCursorY += autonomousCursorVy;
+          cursorX += cursorVx;
+          cursorY += cursorVy;
 
           const maxX = window.innerWidth - cursorSize;
           const maxY = window.innerHeight - cursorSize;
           let bounced = false;
 
           // Bounce off horizontal walls
-          if (autonomousCursorX <= 0) {
-            autonomousCursorX = 0; 
-            autonomousCursorVx *= -1; 
+          if (cursorX <= 0) {
+            cursorX = 0; 
+            cursorVx *= -1; 
             bounced = true;
-          } else if (autonomousCursorX >= maxX) {
-            autonomousCursorX = maxX; 
-            autonomousCursorVx *= -1;
+          } else if (cursorX >= maxX) {
+            cursorX = maxX; 
+            cursorVx *= -1;
             bounced = true;
           }
 
           // Bounce off vertical walls
-          if (autonomousCursorY <= 0) {
-            autonomousCursorY = 0; 
-            autonomousCursorVy *= -1; 
+          if (cursorY <= 0) {
+            cursorY = 0; 
+            cursorVy *= -1; 
             bounced = true;
-          } else if (autonomousCursorY >= maxY) {
-            autonomousCursorY = maxY; 
-            autonomousCursorVy *= -1;
+          } else if (cursorY >= maxY) {
+            cursorY = maxY; 
+            cursorVy *= -1;
             bounced = true;
           }
 
@@ -495,27 +462,22 @@
               currentColorIndex++; 
               
               // Apply damping to velocity after bounce
-              autonomousCursorVx *= screensaverDamping;
-              autonomousCursorVy *= screensaverDamping; 
+              cursorVx *= screensaverDamping;
+              cursorVy *= screensaverDamping; 
 
               // Ensure a minimum speed to prevent stopping entirely
-              const currentSpeed = Math.sqrt(autonomousCursorVx * autonomousCursorVx + autonomousCursorVy * autonomousCursorVy);
+              const currentSpeed = Math.sqrt(cursorVx * cursorVx + cursorVy * cursorVy);
               const minSpeedAfterBounce = 1; 
               if (currentSpeed < minSpeedAfterBounce) {
                   const angle = Math.random() * Math.PI * 2;
-                  autonomousCursorVx = Math.cos(angle) * minSpeedAfterBounce;
-                  autonomousCursorVy = Math.sin(angle) * minSpeedAfterBounce;
+                  cursorVx = Math.cos(angle) * minSpeedAfterBounce;
+                  cursorVy = Math.sin(angle) * minSpeedAfterBounce;
               }
           }
-          // Apply autonomous position
-          customCursor.style.left = `${autonomousCursorX}px`;
-          customCursor.style.top = `${autonomousCursorY}px`;
-
-        } else {
-          // User-controlled mode: Directly follow the last known mouse/touch position
-          customCursor.style.left = `${lastClientX - (cursorSize / 2)}px`;
-          customCursor.style.top = `${lastClientY - (cursorSize / 2)}px`;
-        }
+        } 
+        // Position update for both autonomous and user-controlled modes
+        customCursor.style.left = `${cursorX}px`;
+        customCursor.style.top = `${cursorY}px`;
         
         animationId = requestAnimationFrame(mainAnimationLoop);
       }
@@ -528,13 +490,9 @@
 
         isBallAutonomous = true;
         customCursor.style.opacity = '1'; // Always opaque when autonomous
-
-        // When starting autonomous movement, initialize autonomousCursorX/Y from current visual position
-        autonomousCursorX = customCursor.offsetLeft;
-        autonomousCursorY = customCursor.offsetTop;
         
         // Ensure some velocity if it's currently stopped or too low
-        const currentSpeed = Math.sqrt(autonomousCursorVx * autonomousCursorVx + autonomousCursorVy * autonomousCursorVy);
+        const currentSpeed = Math.sqrt(cursorVx * cursorVx + cursorVy * cursorVy);
         const minAutonomousSpeed = 3; // Minimum speed for autonomous movement
         const maxAutonomousSpeed = 7; // Max speed for autonomous movement
 
@@ -542,13 +500,13 @@
             // If speed is too low, give it a fresh random direction and a speed within a desired range
             const angle = Math.random() * Math.PI * 2;
             const newSpeed = minAutonomousSpeed + Math.random() * (maxAutonomousSpeed - minAutonomousSpeed);
-            autonomousCursorVx = Math.cos(angle) * newSpeed;
-            autonomousCursorVy = Math.sin(angle) * newSpeed;
+            cursorVx = Math.cos(angle) * newSpeed;
+            cursorVy = Math.sin(angle) * newSpeed;
         } else if (currentSpeed > maxAutonomousSpeed) {
             // If speed is too high (e.g., from a quick flick), scale it down
             const scaleFactor = maxAutonomousSpeed / currentSpeed;
-            autonomousCursorVx *= scaleFactor;
-            autonomousCursorVy *= scaleFactor;
+            cursorVx *= scaleFactor;
+            cursorVy *= scaleFactor;
         }
         // If currentSpeed is within [minAutonomousSpeed, maxAutonomousSpeed], keep its current velocity.
       }
@@ -567,22 +525,16 @@
             customCursor.style.opacity = '0.5'; // Reset opacity to default semi-transparent
         }
         
-        // When stopping autonomous, snap lastClientX/Y to the current event's coordinates.
-        // This ensures the direct follow mode starts from the correct point.
+        // If an event is provided, snap cursor position to event coords
         if (e && (e.clientX !== undefined || (e.touches && e.touches[0] && e.touches[0].clientX !== undefined))) {
-            lastClientX = e.clientX !== undefined ? e.clientX : e.touches[0].clientX;
-            lastClientY = e.clientY !== undefined ? e.clientY : e.touches[0].clientY;
-        } else {
-            // Fallback for cases where event might not be available (e.g., mouseleave without explicit coords)
-            lastClientX = customCursor.offsetLeft + (cursorSize / 2);
-            lastClientY = customCursor.offsetTop + (cursorSize / 2);
+            const clientX = e.clientX !== undefined ? e.clientX : e.touches[0].clientX;
+            const clientY = e.clientY !== undefined ? e.clientY : e.touches[0].clientY;
+            cursorX = clientX - (cursorSize / 2);
+            cursorY = clientY - (cursorSize / 2);
+            lastClientX = clientX; 
+            lastClientY = clientY; 
         }
-        // Crucial: Reset autonomous velocities when user takes control
-        autonomousCursorVx = 0;
-        autonomousCursorVy = 0;
       }
-
-      // --- Inactivity Timer Management ---
 
       // Starts the inactivity timer for desktop (or mobile after touch ends)
       function startInactivityTimer() {
@@ -609,9 +561,17 @@
         
         customCursor.style.opacity = '1'; // Make ball opaque when user is interacting directly
 
-        // Update lastClientX and lastClientY from the event
-        lastClientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : lastClientX);
-        lastClientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : lastClientY);
+        const clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : lastClientX);
+        const clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : lastClientY);
+
+        cursorVx = clientX - lastClientX;
+        cursorVy = clientY - lastClientY;
+
+        cursorX = clientX - (cursorSize / 2);
+        cursorY = clientY - (cursorSize / 2);
+        
+        lastClientX = clientX; 
+        lastClientY = clientY; 
       }
 
       // --- Scroll "Budging" Effect Logic ---
@@ -747,8 +707,13 @@
             // The touch events (touchstart, touchend) will then manage switching between user control and autonomous
         }
 
-        // Start the main animation loop
-        mainAnimationLoop();
+        // Initialize lastClientX/Y to current cursor position, adjusted for centering
+        const initialRect = customCursor.getBoundingClientRect();
+        lastClientX = initialRect.left + (cursorSize / 2);
+        lastClientY = initialRect.top + (cursorSize / 2);
+
+        // Start the main animation loop immediately
+        animationId = requestAnimationFrame(mainAnimationLoop);
       }
     })();
   </script>
