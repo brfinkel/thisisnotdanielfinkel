@@ -140,20 +140,6 @@
       }
     }
 
-    /* Keyframe animation for the "spies" word wiggle effect */
-    @keyframes wiggleEffect {
-      0%, 100% { transform: rotate(0deg); }
-      10% { transform: rotate(2deg); }
-      20% { transform: rotate(-2deg); }
-      30% { transform: rotate(1.5deg); }
-      40% { transform: rotate(-1.5deg); }
-      50% { transform: rotate(1deg); }
-      60% { transform: rotate(-1deg); }
-      70% { transform: rotate(0.5deg); }
-      80% { transform: rotate(-0.5deg); }
-      90% { transform: rotate(0.2deg); }
-    }
-
     /* Keyframe animation for the subtle grain overlay movement */
     @keyframes grainAnimation {
       0%, 100% { background-position: 0 0; }
@@ -206,19 +192,6 @@
     /* Ensures span elements within h1 create line breaks */
     .line-break-span {
       display: block;
-    }
-
-    /* Interactive element for the "spies" word */
-    .spies-word {
-      position: relative;
-      display: inline;
-      cursor: default; /* Overridden by global cursor: none */
-      transition: all 0.1s ease;
-    }
-
-    /* Class for triggering the wiggle effect on the "spies" word */
-    .spies-word.wiggle {
-      animation: wiggleEffect 0.5s ease-out;
     }
 
     /* Common styles for italic and Stegner links */
@@ -313,20 +286,24 @@
       gap: 16px; /* Spacing between links */
     }
 
-    /* Styles for individual contact links */
+    /* Styles for individual contact links, with hover effects */
     .contact-text a {
       color: #666; /* Inherits softer color */
       text-decoration: none;
       font-size: 0.75rem; /* Consistent font size */
-      transition: color 0.3s ease; /* Smooth color change on hover */
-      opacity: 0.85;
+      /* Smooth transitions for color, transform, and opacity */
+      transition: color 0.3s ease, transform 0.2s ease-out, opacity 0.2s ease-out;
+      opacity: 0.85; /* Default opacity */
       font-family: var(--font-sans);
       position: relative;
+      display: inline-block; /* Required for transform to work correctly on inline elements */
     }
 
-    /* Hover effect for contact links */
+    /* Hover effect for contact links: lift, scale, and full opacity */
     .contact-text a:hover {
       color: var(--link-hover-color); 
+      transform: translateY(-3px) scale(1.1); /* Lifts up and scales slightly */
+      opacity: 1; /* Becomes fully opaque */
     }
 
     /* Responsive adjustments for smaller screens */
@@ -365,7 +342,7 @@
   <h1>
     <span class="line-break-span">Daniel Finkel is a writer from Philadelphia.</span>
     A 2025-27 <a href="https://creativewriting.stanford.edu/stegner-fellowship/meet-stegner-fellows" target="_blank" rel="noopener" class="stegner-link">Stegner Fellow</a> at Stanford and former editor-in-chief of
-    <a href="https://www.pennreview.org/" target="_blank" rel="noopener" class="body-italic">The Penn Review</a>, he is currently working on a novel about undercover <span class="spies-word">spies</span> in a union election.
+    <a href="https://www.pennreview.org/" target="_blank" rel="noopener" class="body-italic">The Penn Review</a>, he is currently working on a novel about undercover <span>spies</span> in a union election.
   </h1>
   
   <div class="grain"></div>
@@ -461,24 +438,6 @@
         // Continue the animation loop
         rAFScroll = requestAnimationFrame(animateScrollEffect);
       }
-
-      // --- "Spies" Easter Egg Wiggle Logic ---
-      // Adds a click listener to the "spies" word for a subtle wiggle animation
-      function initializeSpiesEasterEgg() {
-        const spiesWord = document.querySelector('.spies-word');
-        if (spiesWord) {
-          spiesWord.addEventListener('click', function(e) {
-            e.preventDefault(); // Prevent default link behavior if it were a link
-            e.stopPropagation(); // Stop event from bubbling up
-
-            spiesWord.classList.add('wiggle'); // Add wiggle class to trigger animation
-            // Remove wiggle class after animation duration to allow re-triggering
-            setTimeout(function() {
-              spiesWord.classList.remove('wiggle');
-            }, 500); // Matches CSS animation duration
-          }, { passive: false }); // passive: false needed due to preventDefault
-        }
-      }
       
       // --- Custom Cursor Link Hover Color & Opacity Logic ---
       // Changes the custom cursor's color and opacity when hovering over any link
@@ -509,14 +468,12 @@
         document.addEventListener('DOMContentLoaded', function() {
           document.addEventListener('mousemove', updateCursor, { passive: true }); // Cursor position
           window.addEventListener('wheel', handleWheel, { passive: false }); // Scroll budging
-          initializeSpiesEasterEgg(); // Spies word wiggle
           initializeCursorLinkHover(); // Cursor color/opacity on link hover
         });
       } else {
         // If DOM is already loaded (e.g., script loaded asynchronously or page was pre-rendered)
         document.addEventListener('mousemove', updateCursor, { passive: true });
         window.addEventListener('wheel', handleWheel, { passive: false });
-        initializeSpiesEasterEgg();
         initializeCursorLinkHover();
       }
     })();
