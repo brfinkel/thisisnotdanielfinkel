@@ -22,11 +22,13 @@
       min-width: 100vw;
       position: relative;
     }
+
     @keyframes gradientShift {
       0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
     }
+
     h1 {
       font-size: clamp(1.1rem, 3.5vw, 2.2rem);
       font-weight: 400;
@@ -46,6 +48,42 @@
       font-family: 'Fraunces', serif;
       z-index: 5;
       position: relative;
+      cursor: default;
+      transition: transform 0.3s ease, letter-spacing 0.4s ease;
+    }
+
+    h1:hover {
+      transform: scale(1.02);
+    }
+
+    /* Special effects for specific words */
+    .spies-word {
+      position: relative;
+      display: inline;
+      cursor: default;
+      transition: all 0.1s ease;
+    }
+    
+    h1:hover .spies-word {
+      cursor: default;
+    }
+
+    .spies-word.wiggle {
+      animation: wiggleEffect 0.5s ease-out;
+    }
+
+    @keyframes wiggleEffect {
+      0% { transform: rotate(0deg); }
+      10% { transform: rotate(2deg); }
+      20% { transform: rotate(-2deg); }
+      30% { transform: rotate(1.5deg); }
+      40% { transform: rotate(-1.5deg); }
+      50% { transform: rotate(1deg); }
+      60% { transform: rotate(-1deg); }
+      70% { transform: rotate(0.5deg); }
+      80% { transform: rotate(-0.5deg); }
+      90% { transform: rotate(0.2deg); }
+      100% { transform: rotate(0deg); }
     }
 
     .line-break-span {
@@ -94,7 +132,71 @@
 
     .body-italic {
       font-style: italic;
+      position: relative;
+      color: inherit;
+      text-decoration: none;
+      cursor: pointer;
     }
+
+    /* Cool underline effect for The Penn Review - now triggered by h1 hover with delay */
+    h1:hover .body-italic::after {
+      width: 100%;
+      transition-delay: 0.125s;
+    }
+
+    h1:not(:hover) .body-italic::after {
+      width: 0%;
+      transition-delay: 0.125s;
+    }
+
+    .body-italic::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0%;
+      height: 2px;
+      background: linear-gradient(270deg, rgba(17, 17, 17, 0.8), rgba(255, 255, 255, 0.9), rgba(17, 17, 17, 0.8));
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+      mix-blend-mode: difference;
+      transition: width 0.6s ease;
+      transition-delay: 0s;
+    }
+
+    .stegner-link {
+      position: relative;
+      color: inherit;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    /* Cool underline effect for Stegner Fellow - now triggered by h1 hover */
+    h1:hover .stegner-link::after {
+      width: 100%;
+      transition-delay: 0s;
+    }
+
+    h1:not(:hover) .stegner-link::after {
+      width: 0%;
+      transition-delay: 0s;
+    }
+
+    .stegner-link::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0%;
+      height: 2px;
+      background: linear-gradient(270deg, rgba(17, 17, 17, 0.8), rgba(255, 255, 255, 0.9), rgba(17, 17, 17, 0.8));
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+      mix-blend-mode: difference;
+      transition: width 0.6s ease;
+      transition-delay: 0.125s;
+    }
+
     .contact-text {
       position: fixed;
       right: 18px;
@@ -111,17 +213,23 @@
       user-select: text;
       gap: 16px;
     }
+
     .contact-text a {
       color: #222;
-      text-decoration: underline;
+      text-decoration: none;
       font-size: 0.8rem;
-      transition: color 0.15s;
+      transition: all 0.3s ease;
       opacity: 0.85;
       font-family: 'Fraunces', serif;
+      position: relative;
     }
+
+
+
     .contact-text a:hover {
       color: #6c63ff;
     }
+
     @media (max-width: 700px) {
       h1 {
         font-size: clamp(1rem, 4.5vw, 1.4rem);
@@ -189,8 +297,6 @@
       "mailto:danielsf@stanford.edu",
       "https://instagram.com/d.s.finkel",
       "https://creativewriting.stanford.edu/stegner-fellowship/current-fellows"
-      // Add other relevant social media profiles or official pages here if you have them.
-      // E.g., "https://www.linkedin.com/in/yourprofile", "https://twitter.com/yourhandle"
     ]
   }
   </script>
@@ -199,13 +305,44 @@
 <body>
   <h1>
     <span class="line-break-span">Daniel Finkel is a writer from Philadelphia.</span>
-    A 2025-27 Stegner Fellow at Stanford and former editor-in-chief of
-    <span class="body-italic">The Penn Review</span>, he is currently working on a novel about undercover spies in a union election.
+    A 2025-27 <a href="https://creativewriting.stanford.edu/stegner-fellowship/meet-stegner-fellows" target="_blank" class="stegner-link">Stegner Fellow</a> at Stanford and former editor-in-chief of
+    <a href="https://www.pennreview.org/" target="_blank" class="body-italic">The Penn Review</a>, he is currently working on a novel about undercover <span class="spies-word">spies</span> in a union election.
   </h1>
   <div class="grain"></div>
   <div class="contact-text">
     <a href="mailto:danielsf@stanford.edu">email</a>
     <a href="https://instagram.com/d.s.finkel" target="_blank">instagram</a>
   </div>
+
+  <script>
+    // Wait for DOM to be fully loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add enhanced parallax effect to the main text
+      document.addEventListener('mousemove', (e) => {
+        const h1 = document.querySelector('h1');
+        if (h1) {
+          const centerX = window.innerWidth / 2;
+          const centerY = window.innerHeight / 2;
+          const deltaX = (e.clientX - centerX) / centerX;
+          const deltaY = (e.clientY - centerY) / centerY;
+          
+          h1.style.transform = `translate(${deltaX * 15}px, ${deltaY * 15}px) scale(${1 + Math.abs(deltaX) * 0.02})`;
+        }
+      });
+
+      // Easter egg click effect for "spies" - wiggle animation
+      const spiesWord = document.querySelector('.spies-word');
+      if (spiesWord) {
+        spiesWord.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          spiesWord.classList.add('wiggle');
+          setTimeout(() => {
+            spiesWord.classList.remove('wiggle');
+          }, 500);
+        });
+      }
+    });
+  </script>
 </body>
 </html>
