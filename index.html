@@ -163,7 +163,7 @@
       max-width: 1000px;
       line-height: 1.6; /* Generous line height for readability */
       text-align: left;
-      /* Removed background-clip, -webkit-background-clip, -webkit-text-fill-color, mix-blend-mode */
+      /* Removed properties that cause transparency/blending for consistent link behavior */
       color: var(--text-color); /* Set explicit color for h1 text to ensure visibility */
       animation: textSettle 1.5s ease-out forwards; /* Only textSettle animation remains */
       word-break: break-word; /* Prevents long words from overflowing */
@@ -205,6 +205,7 @@
     .body-italic:hover,
     .stegner-link:hover {
       color: var(--current-link-hover-color); 
+      opacity: 1; /* Make fully opaque on hover */
     }
 
     /* Explicitly make body italic elements italic */
@@ -323,7 +324,9 @@
       }
       
       .contact-text a {
-        font-size: 0.65rem;
+        font-size: 0.85rem; /* Slightly larger for easier tapping */
+        padding: 8px 12px; /* Increased padding for larger touch target */
+        margin: -8px -12px; /* Adjust negative margin to offset padding */
       }
     }
 
@@ -370,6 +373,7 @@
       const scrollSpring = 0.5; 
       let rAFScroll; // RequestAnimationFrame ID for the scroll effect
 
+      // Primary colors for the ball and link hovers (reverted to original values)
       const primaryColors = [
         'hsl(0, 80%, 55%)',    // Vibrant Red
         'hsl(200, 100%, 40%)', // Intense Blue
@@ -378,81 +382,30 @@
       ];
       let currentColorIndex = 0; 
 
-      // Screensaver variables
-      let isMouseOutsideWindow = false; // Flag to indicate if mouse/touch is inactive (screensaver mode)
-      let cursorX = window.innerWidth / 2; // Current X position of the dot's top-left
-      let cursorY = window.innerHeight / 2; // Current Y position of the dot's top-left
-      let cursorVx = 0; // X velocity (pixels per frame)
-      let cursorVy = 0; // Y velocity (pixels per frame)
-      let cursorSize = 0; // Size of the cursor dot, initialized on DOMContentLoaded
+      // Cursor state variables
+      let isBallAutonomous = false; // true when ball is bouncing on its own, false when user is interacting
+      let cursorX = window.innerWidth / 2; 
+      let cursorY = window.innerHeight / 2; 
+      let cursorVx = 0; 
+      let cursorVy = 0; 
+      let cursorSize = 0; 
       
-      let lastClientX = cursorX; // Last recorded mouse/touch X, for velocity calculation
-      let lastClientY = cursorY; // Last recorded mouse/touch Y, for velocity calculation
+      let lastClientX = cursorX; 
+      let lastClientY = cursorY; 
 
-      // New: Damping factor for screensaver bounce
-      const screensaverDamping = 0.7; // Decreased value for more damping, making it feel heavier
+      const screensaverDamping = 0.7; 
 
-      // Inactivity timer for screensaver activation
+      // Inactivity timer management for desktop fallback
       let inactivityTimeoutId = null;
-      const INACTIVITY_DELAY_MS = 3000; // 3 seconds of inactivity before screensaver activates
+      const INACTIVITY_DELAY_DESKTOP_MS = 3000; // Desktop screensaver delay
 
-      // --- Screensaver & Inactivity Management ---
-      function startInactivityTimer() {
-        clearTimeout(inactivityTimeoutId); // Clear any existing timer
-        inactivityTimeoutId = setTimeout(activateScreensaver, INACTIVITY_DELAY_MS);
-      }
-
-      function clearInactivityTimer(e) {
-        clearTimeout(inactivityTimeoutId);
-        inactivityTimeoutId = null;
-        deactivateScreensaver(e); // Immediately deactivate screensaver if active
-      }
-
-      function activateScreensaver() {
-        if (!isMouseOutsideWindow) { // Only activate if not already active
-          isMouseOutsideWindow = true;
-          customCursor.style.opacity = '1'; // Make the ball fully opaque in screensaver mode
-          // Ensure velocity is set for initial movement
-          const minInitialSpeed = 2;
-          const maxDesiredSpeed = 5;
-          const currentSpeed = Math.sqrt(cursorVx * cursorVx + cursorVy * cursorVy);
-
-          if (currentSpeed < minInitialSpeed) {
-            cursorVx = (Math.random() > 0.5 ? 1 : -1) * (minInitialSpeed + Math.random() * 3);
-            cursorVy = (Math.random() > 0.5 ? 1 : -1) * (minInitialSpeed + Math.random() * 3);
-          } else if (currentSpeed > maxDesiredSpeed) {
-            const scaleFactor = maxDesiredSpeed / currentSpeed;
-            cursorVx *= scaleFactor;
-            cursorVy *= scaleFactor;
-          }
-          console.log('Screensaver: Activated.');
-        }
-      }
-
-      function deactivateScreensaver(e) {
-        if (isMouseOutsideWindow) { // Only deactivate if currently active
-          isMouseOutsideWindow = false;
-          customCursor.style.backgroundColor = 'rgba(0, 0, 0, 0.5)'; // Reset cursor color to default
-          customCursor.style.opacity = '0.5'; // Reset cursor opacity to default for non-hover state
-
-          // Snap cursor to event position if available (mouse or touch), otherwise last known.
-          if (e && (e.clientX !== undefined || (e.touches && e.touches[0] && e.touches[0].clientX !== undefined))) {
-            const clientX = e.clientX !== undefined ? e.clientX : e.touches[0].clientX;
-            const clientY = e.clientY !== undefined ? e.clientY : e.touches[0].clientY;
-            cursorX = clientX - (cursorSize / 2);
-            cursorY = clientY - (cursorSize / 2);
-            lastClientX = clientX; // Also update lastClientX/Y for correct velocity calculation later
-            lastClientY = clientY;
-          }
-          console.log('Screensaver: Deactivated.');
-        }
-      }
+      // Detect mobile device more reliably
+      const isMobileDevice = /Mobi|Android/i.test(navigator.userAgent) || ('ontouchstart' in window);
 
       // --- Main Animation Loop ---
-      // This single loop handles both mouse-following/touch-following and screensaver bouncing.
       function mainAnimationLoop() {
-        if (isMouseOutsideWindow) {
-          // Screensaver Mode: Update position and handle bouncing
+        if (isBallAutonomous) {
+          // Autonomous Mode: Update position and handle bouncing
           cursorX += cursorVx;
           cursorY += cursorVy;
 
@@ -482,9 +435,6 @@
             bounced = true;
           }
 
-          customCursor.style.left = `${cursorX}px`;
-          customCursor.style.top = `${cursorY}px`;
-
           if (bounced) {
               // Change color on bounce
               customCursor.style.backgroundColor = primaryColors[currentColorIndex % primaryColors.length];
@@ -496,45 +446,100 @@
 
               // Ensure a minimum speed to prevent stopping entirely
               const currentSpeed = Math.sqrt(cursorVx * cursorVx + cursorVy * cursorVy);
-              const minSpeedAfterBounce = 1; // Minimum speed after damping
+              const minSpeedAfterBounce = 1; 
               if (currentSpeed < minSpeedAfterBounce) {
-                  // If speed falls below minimum, reset to a small random speed
                   const angle = Math.random() * Math.PI * 2;
                   cursorVx = Math.cos(angle) * minSpeedAfterBounce;
                   cursorVy = Math.sin(angle) * minSpeedAfterBounce;
               }
-
-              console.log(`Screensaver: BOUNCE! New Vx: ${cursorVx.toFixed(1)}, Vy: ${cursorVy.toFixed(1)}. Pos: (${cursorX.toFixed(1)}, ${cursorY.toFixed(1)})`);
           }
-
-        } else {
-          // Mouse/Touch-Following Mode: Cursor position is already updated by events, just apply it
-          customCursor.style.left = `${cursorX}px`;
-          customCursor.style.top = `${cursorY}px`;
-        }
+        } 
+        // Position update for both autonomous and user-controlled modes
+        customCursor.style.left = `${cursorX}px`;
+        customCursor.style.top = `${cursorY}px`;
         
         animationId = requestAnimationFrame(mainAnimationLoop);
       }
 
-      // --- Custom Cursor Positioning Logic (Updates internal X/Y and velocity based on mouse/touch) ---
-      function handleMove(e) {
-        startInactivityTimer(); // Reset inactivity timer on any movement
-        if (!isMouseOutsideWindow) { // Only update if not in screensaver mode
-          const clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : lastClientX);
-          const clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : lastClientY);
+      // --- Cursor State Management Functions ---
 
-          // Calculate instantaneous velocity
-          cursorVx = clientX - lastClientX;
-          cursorVy = clientY - lastClientY;
+      // Starts the ball's autonomous (bouncing) movement
+      function startBallAutonomousMovement() {
+        if (isBallAutonomous) return; // Already autonomous
 
-          // Update cursor position
-          cursorX = clientX - (cursorSize / 2);
-          cursorY = clientY - (cursorSize / 2);
-          
-          // Store current position for next velocity calculation
-          lastClientX = clientX; 
-          lastClientY = clientY; 
+        isBallAutonomous = true;
+        customCursor.style.opacity = '1'; // Always opaque when autonomous
+        
+        // Ensure some velocity if it's currently stopped or too slow
+        const currentSpeed = Math.sqrt(cursorVx * cursorVx + cursorVy * cursorVy);
+        const minInitialSpeed = 2; // Minimum speed for autonomous movement
+        
+        // Reset velocity to a controlled random speed if too slow, otherwise scale down high velocity
+        if (currentSpeed < minInitialSpeed || currentSpeed > 10) { // Limit max initial speed to prevent erratic behavior
+            const angle = Math.random() * Math.PI * 2;
+            const newSpeed = minInitialSpeed + Math.random() * 3; // Random speed between 2 and 5
+            cursorVx = Math.cos(angle) * newSpeed;
+            cursorVy = Math.sin(angle) * newSpeed;
         }
+      }
+
+      // Stops autonomous movement and prepares for user control or idle state
+      function stopBallAutonomousMovement(e) {
+        // If already not autonomous, and opacity/color indicate it's under user control or link hover, do nothing
+        if (!isBallAutonomous && customCursor.style.opacity === '1' && customCursor.style.backgroundColor !== 'rgba(0, 0, 0, 0.5)') {
+            return; 
+        }
+
+        isBallAutonomous = false;
+        // Only set opacity to 0.5 if it's a desktop device not interacting with a link
+        if (!isMobileDevice) {
+            customCursor.style.backgroundColor = 'rgba(0, 0, 0, 0.5)'; // Reset color to default semi-transparent black
+            customCursor.style.opacity = '0.5'; // Reset opacity to default semi-transparent
+        }
+        
+        // If an event is provided, snap cursor position to event coords
+        if (e && (e.clientX !== undefined || (e.touches && e.touches[0] && e.touches[0].clientX !== undefined))) {
+            const clientX = e.clientX !== undefined ? e.clientX : e.touches[0].clientX;
+            const clientY = e.clientY !== undefined ? e.clientY : e.touches[0].clientY;
+            cursorX = clientX - (cursorSize / 2);
+            cursorY = clientY - (cursorSize / 2);
+            lastClientX = clientX; 
+            lastClientY = clientY; 
+        }
+      }
+
+      // Starts the inactivity timer for desktop (or mobile after touch ends)
+      function startInactivityTimer() {
+        clearTimeout(inactivityTimeoutId);
+        inactivityTimeoutId = setTimeout(startBallAutonomousMovement, INACTIVITY_DELAY_DESKTOP_MS);
+      }
+
+      // Clears the inactivity timer (called on any user interaction)
+      function clearInactivityTimer() {
+        clearTimeout(inactivityTimeoutId);
+        inactivityTimeoutId = null;
+      }
+
+      // --- Event Handlers for Cursor Movement ---
+
+      // Handles mousemove and touchmove to control the ball
+      function handleMove(e) {
+        clearInactivityTimer(); // Any interaction resets the inactivity timer
+        stopBallAutonomousMovement(e); // Stop autonomous movement, reset opacity/color to default
+        
+        customCursor.style.opacity = '1'; // Make ball opaque when user is interacting directly
+
+        const clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : lastClientX);
+        const clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : lastClientY);
+
+        cursorVx = clientX - lastClientX;
+        cursorVy = clientY - lastClientY;
+
+        cursorX = clientX - (cursorSize / 2);
+        cursorY = clientY - (cursorSize / 2);
+        
+        lastClientX = clientX; 
+        lastClientY = clientY; 
       }
 
       // --- Scroll "Budging" Effect Logic ---
@@ -543,60 +548,45 @@
 
       function handleWheel(e) {
         e.preventDefault(); 
-        startInactivityTimer(); // Reset inactivity timer on scroll
+        clearInactivityTimer(); // Interaction resets timer
         
         targetScrollOffset += -e.deltaY * scrollSensitivity;
         targetScrollOffset = Math.max(-scrollAmplitude, Math.min(scrollAmplitude, targetScrollOffset));
 
-        if (!rAFScroll) { // Only start a new animation frame if one isn't already running
+        if (!rAFScroll) { 
           rAFScroll = requestAnimationFrame(animateScrollEffect);
         }
       }
 
       function handleTouchStart(e) {
         initialTouchY = e.touches[0].clientY;
-        startInactivityTimer(); // Reset inactivity timer on touch start
+        handleMove(e); // Use handleMove for initial position and velocity setup
       }
 
       function handleTouchMove(e) {
-        e.preventDefault(); // Prevent native scrolling to allow custom budging effect
-        startInactivityTimer(); // Reset inactivity timer on touch move
-
-        const touchDeltaY = e.touches[0].clientY - initialTouchY;
-        targetScrollOffset += touchDeltaY * scrollSensitivity;
-        targetScrollOffset = Math.max(-scrollAmplitude, Math.min(scrollAmplitude, targetScrollOffset));
-        
-        initialTouchY = e.touches[0].clientY; // Update for next move calculation
-
-        if (!rAFScroll) {
-          rAFScroll = requestAnimationFrame(animateScrollEffect);
-        }
-
-        // Also update cursor position based on touch
-        handleMove(e);
+        e.preventDefault(); // Prevent native scrolling for custom budging effect
+        handleMove(e); // Use handleMove to update position and velocity for drag
       }
 
       function handleTouchEnd(e) {
-        startInactivityTimer(); // Reset inactivity timer on touch end
-        // No explicit cursor movement needed here as it stops when touch ends
+        startInactivityTimer(); // Start timer for autonomous movement after release
+        // On mobile, the ball will automatically become opaque and colored again when autonomous movement starts
+        // On desktop, it will revert to default semi-transparent if not over a link
       }
-
 
       function animateScrollEffect() {
         const delta = targetScrollOffset - scrollOffset;
         scrollOffset += delta * scrollSpring;
 
-        // Apply damping to targetScrollOffset to bring it back to zero
         targetScrollOffset *= (1 - scrollDamping);
 
-        // Stop animation if values are very close to zero
         if (Math.abs(delta) < 0.1 && Math.abs(targetScrollOffset) < 0.1) {
           scrollOffset = 0; 
           targetScrollOffset = 0;
           if (h1) { 
-            h1.style.transform = `none`; // Reset transform once animation is complete
+            h1.style.transform = `none`; 
           }
-          rAFScroll = null; // Clear the animation frame ID
+          rAFScroll = null; 
           return;
         }
 
@@ -613,36 +603,41 @@
 
         allLinks.forEach(link => {
           link.addEventListener('mouseenter', () => {
+            clearInactivityTimer(); // Interaction resets timer
+            stopBallAutonomousMovement(); // Stop autonomous movement, reset appearance to default
+            
             const newColor = primaryColors[currentColorIndex % primaryColors.length];
             customCursor.style.backgroundColor = newColor;
             customCursor.style.opacity = '1'; 
-            document.documentElement.style.setProperty('--current-link-hover-color', newColor); // Set CSS variable on root
+            document.documentElement.style.setProperty('--current-link-hover-color', newColor); 
             currentColorIndex++; 
           });
 
           link.addEventListener('mouseleave', () => {
-            if (!isMouseOutsideWindow) { // Only revert to default if not in screensaver mode
-              customCursor.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-              customCursor.style.opacity = '0.5'; 
-              document.documentElement.style.setProperty('--current-link-hover-color', 'var(--link-hover-color-default)'); // Reset to default
+            if (!isMobileDevice) { // Only desktop returns to semi-transparent idle on mouseleave
+                stopBallAutonomousMovement(); // Reset opacity and color to default
+                startInactivityTimer(); // Restart timer for screensaver
             }
+            document.documentElement.style.setProperty('--current-link-hover-color', 'var(--link-hover-color-default)');
           });
 
-          // Add touch equivalents for hover effect
+          // Touch equivalents for link hover effect
           link.addEventListener('touchstart', () => {
+              clearInactivityTimer();
+              stopBallAutonomousMovement(); // Stop autonomous, reset appearance
+              
               const newColor = primaryColors[currentColorIndex % primaryColors.length];
               customCursor.style.backgroundColor = newColor;
               customCursor.style.opacity = '1'; 
-              document.documentElement.style.setProperty('--current-link-hover-color', newColor); // Set CSS variable on root
+              document.documentElement.style.setProperty('--current-link-hover-color', newColor); 
               currentColorIndex++; 
           });
 
           link.addEventListener('touchend', () => {
-              if (!isMouseOutsideWindow) {
-                  customCursor.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-                  customCursor.style.opacity = '0.5'; 
-                  document.documentElement.style.setProperty('--current-link-hover-color', 'var(--link-hover-color-default)'); // Reset to default
-              }
+              // On touchend for links, the overall touchend handler will call startInactivityTimer.
+              // This will manage the ball's autonomous state and appearance.
+              // We only need to reset the link hover color property here.
+              document.documentElement.style.setProperty('--current-link-hover-color', 'var(--link-hover-color-default)'); 
           });
         });
       }
@@ -657,30 +652,29 @@
       function setupListeners() {
         cursorSize = customCursor.offsetWidth; 
 
-        // Mouse events
+        // General interaction events
         document.addEventListener('mousemove', handleMove, { passive: true }); 
         window.addEventListener('wheel', handleWheel, { passive: false }); 
         
-        // Touch events
         document.addEventListener('touchstart', handleTouchStart, { passive: false });
         document.addEventListener('touchmove', handleTouchMove, { passive: false });
         document.addEventListener('touchend', handleTouchEnd, { passive: false });
 
         initializeCursorLinkHover(); 
         
-        // Primary triggers for screensaver activation/deactivation
-        document.body.addEventListener('mouseleave', activateScreensaver);
-        document.body.addEventListener('mouseenter', clearInactivityTimer); // Use clearInactivityTimer for re-entry
-
-        // Robust fallbacks for window blur/focus (e.g., tab switching, minimizing)
-        window.addEventListener('blur', activateScreensaver);
-        window.addEventListener('focus', clearInactivityTimer);
-
-        // Start inactivity timer on initial load
-        startInactivityTimer();
+        // Handle desktop-specific mouseleave/focus for screensaver
+        if (!isMobileDevice) {
+            document.body.addEventListener('mouseleave', startBallAutonomousMovement); // Starts screensaver immediately on mouseleave
+            document.body.addEventListener('mouseenter', stopBallAutonomousMovement); // Stops screensaver on mouseenter
+            window.addEventListener('blur', startBallAutonomousMovement); // Activates screensaver on window blur
+            window.addEventListener('focus', stopBallAutonomousMovement); // Deactivates screensaver on window focus
+        } else {
+            // On mobile, start autonomous movement immediately on load
+            startBallAutonomousMovement();
+            // The touch events (touchstart, touchend) will then manage switching between user control and autonomous
+        }
 
         // Initialize lastClientX/Y to current cursor position, adjusted for centering
-        // This ensures the velocity calculation is accurate from the very start
         const initialRect = customCursor.getBoundingClientRect();
         lastClientX = initialRect.left + (cursorSize / 2);
         lastClientY = initialRect.top + (cursorSize / 2);
