@@ -68,7 +68,7 @@
     /* CSS Custom Properties for maintainability and easy theming */
     :root {
       --primary-gradient: linear-gradient(270deg, #333, #ccc, #333); /* Soft grayscale gradient for text */
-      --background-gradient: radial-gradient(circle at center, #fbc2eb, #a6c1ee, #ffd6d6, #e0c3fc); /* User-specified background gradient */
+      --background-gradient: radial-gradient(circle at center, #fefefe, #e8e8e8, #f0f0f0, #e0e0e0); /* Updated to shades of white */
       --animation-duration-fast: 15s;
       --animation-duration-slow: 40s;
       --text-color: #333; /* Softer dark grey for general text */
@@ -164,9 +164,8 @@
       line-height: 1.6; /* Generous line height for readability */
       text-align: left;
       
-      /* Using opacity for subtle transparency, simpler and more reliable for nested links */
-      color: var(--text-color); /* Base text color */
-      opacity: 0.7; /* Apply transparency to the entire H1 text block */
+      /* Main H1 text is now solid, not blended */
+      color: var(--text-color); 
       animation: textSettle 1.5s ease-out forwards;
       
       word-break: break-word; /* Prevents long words from overflowing */
@@ -198,25 +197,35 @@
     .body-italic,
     .stegner-link {
       position: relative;
-      color: var(--text-color); /* Initial text color */
+      /* By default, these links have the blending effect */
+      background: var(--primary-gradient);
+      background-size: 400% 400%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      mix-blend-mode: difference; /* This creates the initial blended effect on links */
+      animation: gradientShift var(--animation-duration-fast) ease infinite; /* Links animate their own gradient */
+      
       text-decoration: none; /* No default underline */
       cursor: default; /* Overridden by global cursor: none */
-      transition: color 0.3s ease, opacity 0.3s ease; /* Smooth transition for color and opacity */
+      transition: color 0.3s ease, opacity 0.3s ease, background 0.3s ease; /* Add background to transition for smooth changes */
     }
 
     /* Styles for hover state of specific links: Stegner Fellow and The Penn Review */
     .body-italic:hover,
     .stegner-link:hover {
-      /* Force solid, vibrant color to match the ball */
+      /* On hover, switch to normal blending and solid color */
       color: var(--current-link-hover-color) !important;
+      -webkit-text-fill-color: var(--current-link-hover-color) !important; /* Important for WebKit to get solid fill */
       opacity: 1 !important; /* Ensure full opacity */
       
-      /* Reset any inherited properties that might cause transparency or blending */
-      -webkit-text-fill-color: var(--current-link-hover-color) !important; /* Important for WebKit to get solid fill */
+      mix-blend-mode: normal !important; /* Crucial to break from parent's blend mode */
+      background: none !important; /* Remove the gradient background on hover for solid color */
+      background-color: transparent !important; /* Ensure no background color on hover */
+      
+      /* Reset clipping to ensure solid color is applied to the entire text area */
       background-clip: border-box !important;
       -webkit-background-clip: border-box !important;
-      mix-blend-mode: normal !important; /* Crucial to break from parent's blend mode */
-      background: none !important; /* Ensure no background issues */
     }
 
     /* Explicitly make body italic elements italic */
