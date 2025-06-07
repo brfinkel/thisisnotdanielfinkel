@@ -5,17 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Daniel Finkel | Stegner Fellow at Stanford, Writer</title>
   
-  <!-- Preload critical resources -->
+  <!-- Preload critical resources: Fonts and the grain texture -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
   <link rel="preload" href="https://grainy-gradients.vercel.app/noise.png" as="image" />
   
-  <!-- SEO Meta Tags -->
+  <!-- SEO Meta Tags for discoverability and rich snippets -->
   <meta name="description" content="Official website of Daniel Finkel, a 2025-27 Wallace Stegner Fellow in Fiction at Stanford University and writer from Philadelphia. Currently working on a novel." />
   <meta name="keywords" content="Daniel Finkel, Daniel Finkel writer, Daniel Finkel Stegner, Daniel Finkel Stanford, Wallace Stegner Fellow, Stanford University, novelist, The Penn Review, Philadelphia writer" />
   
-  <!-- Open Graph / Social Media -->
+  <!-- Open Graph / Social Media Meta Tags for better sharing previews -->
   <meta property="og:title" content="Daniel Finkel | Stegner Fellow at Stanford, Writer" />
   <meta property="og:description" content="Official website of Daniel Finkel, a 2025-27 Wallace Stegner Fellow in Fiction at Stanford University and writer from Philadelphia. Currently working on a novel." />
   <meta property="og:type" content="profile" />
@@ -24,7 +24,7 @@
   <meta name="twitter:title" content="Daniel Finkel | Stegner Fellow at Stanford, Writer" />
   <meta name="twitter:description" content="Official website of Daniel Finkel, a 2025-27 Wallace Stegner Fellow in Fiction at Stanford University and writer from Philadelphia. Currently working on a novel." />
   
-  <!-- Structured Data -->
+  <!-- Structured Data (Schema.org) for enhanced search results -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -65,41 +65,70 @@
   </script>
 
   <style>
-    /* CSS Custom Properties for maintainability */
+    /* CSS Custom Properties for maintainability and easy theming */
     :root {
-      --primary-gradient: linear-gradient(270deg, #111, #fff, #111);
-      --background-gradient: radial-gradient(circle at center, #fbc2eb, #a6c1ee, #ffd6d6, #e0c3fc);
+      --primary-gradient: linear-gradient(270deg, #333, #ccc, #333); /* Soft grayscale gradient for text */
+      --background-gradient: radial-gradient(circle at center, #fbc2eb, #a6c1ee, #ffd6d6, #e0c3fc); /* User-specified background gradient */
       --animation-duration-fast: 15s;
       --animation-duration-slow: 40s;
-      --text-color: #222;
-      --link-hover-color: #6c63ff;
-      --font-family: 'Fraunces', serif;
+      --text-color: #333; /* Softer dark grey for general text */
+      --link-hover-color: #6c63ff; /* Original link hover color */
+      --font-serif: 'Fraunces', serif;
+      --font-sans: 'Inter', sans-serif; /* Modern sans-serif font for secondary text */
     }
 
-    /* Reset and base styles */
+    /* Universal reset for margin and padding */
+    *, *::before, *::after {
+        box-sizing: border-box;
+    }
+
+    /* Base styles for HTML and Body: Full viewport, flexbox centering, custom cursor */
     html, body {
       margin: 0;
       height: 100%;
-      font-family: var(--font-family);
-      display: flex;
+      font-family: var(--font-serif); /* Default font for main content */
+      display: flex; /* Flexbox for centering main content */
       justify-content: center;
       align-items: center;
       background: var(--background-gradient);
-      background-size: 500% 500%;
-      background-attachment: fixed;
-      animation: gradientShift var(--animation-duration-slow) ease infinite;
-      overflow: hidden;
+      background-size: 500% 500%; /* Enables background animation */
+      background-attachment: fixed; /* Keeps background fixed during any scroll */
+      animation: gradientShift var(--animation-duration-slow) ease infinite; /* Animates background position */
+      overflow: hidden; /* Crucial to prevent native scrollbars for custom scroll effect */
       min-height: 100vh;
       min-width: 100vw;
       position: relative;
+      cursor: none !important; /* Force hides native cursor across the entire page */
     }
 
-    /* Shared animations */
+    /* Force hide native cursor for all anchor links */
+    a {
+      cursor: none !important;
+    }
+
+    /* Custom cursor styles: Fixed position, small dot, smooth transitions */
+    .custom-cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 8px; /* Size of the custom dot */
+      height: 8px;
+      background-color: rgba(0, 0, 0, 0.5); /* Default semi-transparent black */
+      border-radius: 50%; /* Makes it a perfect circle */
+      pointer-events: none; /* Allows mouse events to pass through to elements beneath */
+      z-index: 9999; /* Ensures it's always on top */
+      transform: translate(-50%, -50%); /* Centers the dot precisely on the cursor's coordinates */
+      transition: background-color 0.2s ease-out, opacity 0.2s ease-out; /* Smooth color and opacity changes */
+      will-change: transform, background-color, opacity; /* Performance hint for browser */
+    }
+
+    /* Keyframe animation for the background gradient shift */
     @keyframes gradientShift {
       0%, 100% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
     }
 
+    /* Keyframe animation for initial text settling effect */
     @keyframes textSettle {
       0% {
         transform: scale(1.05);
@@ -111,6 +140,7 @@
       }
     }
 
+    /* Keyframe animation for the "spies" word wiggle effect */
     @keyframes wiggleEffect {
       0%, 100% { transform: rotate(0deg); }
       10% { transform: rotate(2deg); }
@@ -124,6 +154,7 @@
       90% { transform: rotate(0.2deg); }
     }
 
+    /* Keyframe animation for the subtle grain overlay movement */
     @keyframes grainAnimation {
       0%, 100% { background-position: 0 0; }
       10% { background-position: 1px 1px; }
@@ -137,149 +168,168 @@
       90% { background-position: -1px -1px; }
     }
 
-    /* Main typography */
+    /* Main typography styles for the h1 element */
     h1 {
-      font-size: clamp(1.1rem, 3.5vw, 2.2rem);
+      font-size: clamp(1.1rem, 3.5vw, 2.2rem); /* Responsive font size */
       font-weight: 400;
-      width: clamp(80vw, 85vw, 1000px);
+      width: clamp(80vw, 85vw, 1000px); /* Responsive width with max constraint */
       max-width: 1000px;
-      line-height: 1.6;
+      line-height: 1.6; /* Generous line height for readability */
       text-align: left;
-      background: var(--primary-gradient);
-      background-size: 400% 400%;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      background: var(--primary-gradient); /* Text color from gradient */
+      background-size: 400% 400%; /* Enables gradient animation on text */
+      -webkit-background-clip: text; /* Clip background to text shape (for WebKit) */
+      -webkit-text-fill-color: transparent; /* Make text transparent to show background */
+      background-clip: text; /* Clip background to text shape (standard) */
       animation: gradientShift var(--animation-duration-fast) ease infinite, textSettle 1.5s ease-out forwards;
-      mix-blend-mode: difference;
-      word-break: break-word;
-      overflow-wrap: break-word;
-      margin: 0;
-      font-family: var(--font-family);
+      mix-blend-mode: difference; /* Creates the unique "translucency" effect with background */
+      word-break: break-word; /* Prevents long words from overflowing */
+      overflow-wrap: break-word; /* Handles word wrapping */
+      margin: 0; /* Important for correct flex centering */
+      font-family: var(--font-serif);
       z-index: 5;
-      position: relative;
-      cursor: default;
-      transition: transform 0.3s ease, letter-spacing 0.4s ease;
-      will-change: transform;
+      position: relative; /* Necessary for z-index and positioning of child elements like underlines */
+      cursor: none !important; /* Force hide native cursor on h1 */
+      /* Prevents text selection */
+      -webkit-user-select: none; 
+      -moz-user-select: none; 
+      -ms-user-select: none; 
+      user-select: none; 
+      will-change: transform; /* Performance hint for the scroll budging animation */
     }
 
+    /* Disable hover transform on h1 as it's not part of the lovefrom.com aesthetic */
     h1:hover {
-      transform: scale(1.02);
+      transform: none; 
     }
 
+    /* Ensures span elements within h1 create line breaks */
     .line-break-span {
       display: block;
     }
 
-    /* Interactive elements */
+    /* Interactive element for the "spies" word */
     .spies-word {
       position: relative;
       display: inline;
-      cursor: default;
+      cursor: default; /* Overridden by global cursor: none */
       transition: all 0.1s ease;
     }
 
+    /* Class for triggering the wiggle effect on the "spies" word */
     .spies-word.wiggle {
       animation: wiggleEffect 0.5s ease-out;
     }
 
-    /* Link styles with shared underline behavior */
+    /* Common styles for italic and Stegner links */
     .body-italic,
     .stegner-link {
       position: relative;
-      color: inherit;
-      text-decoration: none;
-      cursor: pointer;
+      color: inherit; /* Inherits text color from parent (h1) */
+      text-decoration: none; /* No default underline */
+      cursor: default; /* Overridden by global cursor: none */
+      transition: color 0.3s ease; /* Smooth color change on hover */
     }
 
+    /* Subtle hover color for links */
+    .body-italic:hover,
+    .stegner-link:hover {
+      color: var(--link-hover-color); 
+    }
+
+    /* Explicitly make body italic elements italic */
     .body-italic {
       font-style: italic;
     }
 
-    /* Shared underline animation styles */
+    /* Shared underline base styles for links (original behavior tied to h1 hover) */
     .body-italic::after,
     .stegner-link::after {
       content: '';
       position: absolute;
-      bottom: -2px;
+      bottom: -2px; /* Position beneath the text */
       left: 0;
-      width: 0%;
+      width: 0%; /* Initially hidden */
       height: 2px;
-      background: var(--primary-gradient);
+      background: var(--primary-gradient); /* Underline uses the text gradient */
       background-size: 400% 400%;
       background-position: 0% 50%;
       animation: gradientShift var(--animation-duration-fast) ease infinite;
-      opacity: 0.5;
-      transition: width 0.6s ease;
+      opacity: 0.5; /* Semi-transparent underline */
+      transition: width 0.6s ease; /* Smooth transition for width change */
     }
 
-    /* Hover states for underlines */
+    /* Underline appears when the entire h1 is hovered */
     h1:hover .body-italic::after {
       width: 100%;
-      transition-delay: 0.125s;
+      transition-delay: 0.125s; /* Small delay for staggered effect */
     }
 
+    /* Underline appears when the entire h1 is hovered (no delay for stegner link) */
     h1:hover .stegner-link::after {
       width: 100%;
       transition-delay: 0s;
     }
 
+    /* Underline retracts when the h1 is no longer hovered */
     h1:not(:hover) .body-italic::after,
     h1:not(:hover) .stegner-link::after {
       width: 0%;
-      transition-delay: 0.125s;
+      transition-delay: 0.125s; /* Small delay on retract for consistent feel */
     }
 
-    /* Grain texture overlay */
+    /* Grain texture overlay: Covers the entire screen, provides subtle visual noise */
     .grain {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      pointer-events: none;
+      pointer-events: none; /* Allows clicks and interactions to pass through */
       background-image: url('https://grainy-gradients.vercel.app/noise.png');
-      background-size: 100px;
-      opacity: 0.8;
-      filter: contrast(150%) brightness(120%);
-      z-index: 20;
-      mix-blend-mode: multiply;
-      animation: grainAnimation 1s linear infinite;
+      background-size: 100px; /* Scales the noise image */
+      opacity: 0.5; /* Reduced opacity for subtlety */
+      filter: none; /* No strong filters for natural look */
+      z-index: 20; /* Ensures it's above background but below main content */
+      mix-blend-mode: overlay; /* Soft blend with content below */
+      animation: grainAnimation 1s linear infinite; /* Animates the grain for a live effect */
     }
 
-    /* Contact information */
+    /* Contact information block: Fixed position, discreet styling */
     .contact-text {
       position: fixed;
       right: 18px;
       bottom: 12px;
-      font-size: 0.8rem;
-      color: var(--text-color);
-      z-index: 30;
-      opacity: 0.72;
+      font-size: 0.75rem; /* Slightly smaller for discreteness */
+      color: #666; /* Softer text color */
+      z-index: 30; /* Ensures it's above other elements */
+      opacity: 0.8; /* Slightly opaque for a subtle presence */
       display: flex;
       flex-direction: row;
       align-items: center;
-      font-family: var(--font-family);
-      pointer-events: auto;
-      user-select: text;
-      gap: 16px;
+      font-family: var(--font-sans); /* Uses the sans-serif font */
+      pointer-events: auto; /* Allows interaction with contact links */
+      user-select: text; /* Allows text selection for copying contact info */
+      gap: 16px; /* Spacing between links */
     }
 
+    /* Styles for individual contact links */
     .contact-text a {
-      color: var(--text-color);
+      color: #666; /* Inherits softer color */
       text-decoration: none;
-      font-size: 0.8rem;
-      transition: color 0.3s ease;
+      font-size: 0.75rem; /* Consistent font size */
+      transition: color 0.3s ease; /* Smooth color change on hover */
       opacity: 0.85;
-      font-family: var(--font-family);
+      font-family: var(--font-sans);
       position: relative;
     }
 
+    /* Hover effect for contact links */
     .contact-text a:hover {
-      color: var(--link-hover-color);
+      color: var(--link-hover-color); 
     }
 
-    /* Responsive design */
+    /* Responsive adjustments for smaller screens */
     @media (max-width: 700px) {
       h1 {
         font-size: clamp(1rem, 4.5vw, 1.4rem);
@@ -289,18 +339,18 @@
       }
       
       .contact-text {
-        font-size: 0.70rem;
+        font-size: 0.65rem; 
         bottom: 8px;
         right: 8px;
-        gap: 10px;
+        gap: 8px; 
       }
       
       .contact-text a {
-        font-size: 0.70rem;
+        font-size: 0.65rem;
       }
     }
 
-    /* Performance optimizations */
+    /* Accessibility: Disable animations for users preferring reduced motion */
     @media (prefers-reduced-motion: reduce) {
       * {
         animation-duration: 0.01ms !important;
@@ -319,6 +369,7 @@
   </h1>
   
   <div class="grain"></div>
+  <div class="custom-cursor"></div> <!-- Custom dot cursor element -->
   
   <div class="contact-text">
     <a href="mailto:danielsf@stanford.edu">email</a>
@@ -329,51 +380,144 @@
     (function() {
       'use strict';
       
-      // Optimize performance with passive listeners and requestAnimationFrame
-      let ticking = false;
-      
-      function updateParallax(e) {
-        if (!ticking) {
-          requestAnimationFrame(function() {
-            const h1 = document.querySelector('h1');
-            if (h1) {
-              const centerX = window.innerWidth * 0.5;
-              const centerY = window.innerHeight * 0.5;
-              const deltaX = (e.clientX - centerX) / centerX;
-              const deltaY = (e.clientY - centerY) / centerY;
-              
-              h1.style.transform = `translate(${deltaX * 15}px, ${deltaY * 15}px) scale(${1 + Math.abs(deltaX) * 0.02})`;
-            }
-            ticking = false;
-          });
-          ticking = true;
+      const customCursor = document.querySelector('.custom-cursor');
+      let rAFCursor; // RequestAnimationFrame ID for custom cursor position update
+      let rAFScroll; // RequestAnimationFrame ID for scroll budging effect
+
+      let scrollOffset = 0; // Current actual vertical offset of h1 (for budging)
+      let targetScrollOffset = 0; // Desired vertical offset from mouse wheel input
+      const scrollAmplitude = 80; // Maximum vertical movement in pixels for budging
+      const scrollSensitivity = 0.6; // How much mouse wheel delta affects the target offset
+      const scrollDamping = 0.08; // How quickly the text returns to center (damping effect)
+      const scrollSpring = 0.5; // How quickly the text moves towards the target offset (spring effect)
+
+      // Define primary colors for cursor cycling (HSL for easy hue rotation and brightness control)
+      const primaryColors = [
+        'hsl(0, 80%, 55%)',    // Vibrant Red
+        'hsl(200, 100%, 40%)', // Intense Blue
+        'hsl(50, 100%, 55%)',  // Vibrant Yellow (more contrast)
+        'hsl(140, 70%, 45%)'   // Lively Green
+      ];
+      let currentColorIndex = 0; // Index to cycle through primaryColors
+
+      // --- Custom Cursor Positioning Logic ---
+      // Uses requestAnimationFrame for smooth, browser-optimized cursor movement
+      function updateCursor(e) {
+        // Prevent multiple rAF calls if one is already pending
+        if (rAFCursor) return;
+        rAFCursor = requestAnimationFrame(() => {
+          customCursor.style.left = `${e.clientX}px`;
+          customCursor.style.top = `${e.clientY}px`;
+          rAFCursor = null; // Reset rAF ID after execution
+        });
+      }
+
+      // --- Scroll "Budging" Effect Logic ---
+      const h1 = document.querySelector('h1'); // Cache h1 element for efficiency
+
+      // Handles mouse wheel events to initiate the budging effect
+      function handleWheel(e) {
+        e.preventDefault(); // Prevent default browser scrolling behavior
+
+        // Adjust the target offset based on the mouse wheel delta (vertical scroll amount)
+        targetScrollOffset += -e.deltaY * scrollSensitivity;
+        // Clamp the target offset within the defined amplitude to prevent excessive movement
+        targetScrollOffset = Math.max(-scrollAmplitude, Math.min(scrollAmplitude, targetScrollOffset));
+
+        // If animation is not already running, start the animation loop
+        if (!rAFScroll) {
+          rAFScroll = requestAnimationFrame(animateScrollEffect);
         }
       }
-      
+
+      // The main animation loop for the scroll budging effect
+      function animateScrollEffect() {
+        // Calculate the difference between target and current offset (spring effect)
+        const delta = targetScrollOffset - scrollOffset;
+        scrollOffset += delta * scrollSpring;
+
+        // Apply damping to gradually bring the target offset back to zero over time
+        // This ensures the text "settles" back to its original position
+        targetScrollOffset *= (1 - scrollDamping);
+
+        // Stop the animation loop if the movement is visually imperceptible
+        // This saves CPU cycles when no active animation is needed
+        if (Math.abs(delta) < 0.1 && Math.abs(targetScrollOffset) < 0.1) {
+          scrollOffset = 0; // Snap to zero to ensure exact reset
+          targetScrollOffset = 0;
+          if (h1) { 
+            // Reset h1 transform to 'none' to allow flexbox to perfectly center it
+            h1.style.transform = `none`; 
+          }
+          rAFScroll = null; // Stop the animation loop
+          return;
+        }
+
+        // Apply the calculated vertical transform to the h1 element
+        if (h1) { 
+          h1.style.transform = `translateY(${scrollOffset}px)`;
+        }
+        
+        // Continue the animation loop
+        rAFScroll = requestAnimationFrame(animateScrollEffect);
+      }
+
+      // --- "Spies" Easter Egg Wiggle Logic ---
+      // Adds a click listener to the "spies" word for a subtle wiggle animation
       function initializeSpiesEasterEgg() {
         const spiesWord = document.querySelector('.spies-word');
         if (spiesWord) {
           spiesWord.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            spiesWord.classList.add('wiggle');
+            e.preventDefault(); // Prevent default link behavior if it were a link
+            e.stopPropagation(); // Stop event from bubbling up
+
+            spiesWord.classList.add('wiggle'); // Add wiggle class to trigger animation
+            // Remove wiggle class after animation duration to allow re-triggering
             setTimeout(function() {
               spiesWord.classList.remove('wiggle');
-            }, 500);
-          }, { passive: false });
+            }, 500); // Matches CSS animation duration
+          }, { passive: false }); // passive: false needed due to preventDefault
         }
       }
       
-      // Initialize when DOM is ready
+      // --- Custom Cursor Link Hover Color & Opacity Logic ---
+      // Changes the custom cursor's color and opacity when hovering over any link
+      function initializeCursorLinkHover() {
+        const allLinks = document.querySelectorAll('a'); // Get all anchor tags once
+
+        allLinks.forEach(link => {
+          // When mouse enters a link
+          link.addEventListener('mouseenter', () => {
+            // Set background color to the next primary color in the cycle
+            customCursor.style.backgroundColor = primaryColors[currentColorIndex % primaryColors.length];
+            customCursor.style.opacity = '1'; // Make cursor fully opaque
+            currentColorIndex++; // Move to the next color for the next link hover
+          });
+
+          // When mouse leaves a link
+          link.addEventListener('mouseleave', () => {
+            // Reset cursor to default color and opacity
+            customCursor.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+            customCursor.style.opacity = '0.5'; 
+          });
+        });
+      }
+
+      // --- Initialization on DOM Ready ---
+      // Ensures all elements are loaded before attaching event listeners
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function() {
-          document.addEventListener('mousemove', updateParallax, { passive: true });
-          initializeSpiesEasterEgg();
+          document.addEventListener('mousemove', updateCursor, { passive: true }); // Cursor position
+          window.addEventListener('wheel', handleWheel, { passive: false }); // Scroll budging
+          initializeSpiesEasterEgg(); // Spies word wiggle
+          initializeCursorLinkHover(); // Cursor color/opacity on link hover
         });
       } else {
-        document.addEventListener('mousemove', updateParallax, { passive: true });
+        // If DOM is already loaded (e.g., script loaded asynchronously or page was pre-rendered)
+        document.addEventListener('mousemove', updateCursor, { passive: true });
+        window.addEventListener('wheel', handleWheel, { passive: false });
         initializeSpiesEasterEgg();
+        initializeCursorLinkHover();
       }
     })();
   </script>
