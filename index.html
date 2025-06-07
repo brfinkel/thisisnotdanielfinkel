@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Daniel Finkel | Stegner Fellow at Stanford, Writer</title>
+  <title>Daniel Finkel | Stegner Fellow | Writer</title>
   
   <!-- Preload critical resources: Fonts and the grain texture -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -16,12 +16,12 @@
   <meta name="keywords" content="Daniel Finkel, Daniel Finkel writer, Daniel Finkel Stegner, Daniel Finkel Stanford, Wallace Stegner Fellow, Stanford University, novelist, The Penn Review, Philadelphia writer" />
   
   <!-- Open Graph / Social Media Meta Tags for better sharing previews -->
-  <meta property="og:title" content="Daniel Finkel | Stegner Fellow at Stanford, Writer" />
+  <meta property="og:title" content="Daniel Finkel | Stegner Fellow | Writer" />
   <meta property="og:description" content="Official website of Daniel Finkel, a 2025-27 Wallace Stegner Fellow in Fiction at Stanford University and writer from Philadelphia. Currently working on a novel." />
   <meta property="og:type" content="profile" />
   <meta property="og:url" content="https://dsfinkel.com/" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Daniel Finkel | Stegner Fellow at Stanford, Writer" />
+  <meta name="twitter:title" content="Daniel Finkel | Stegner Fellow | Writer" />
   <meta name="twitter:description" content="Official website of Daniel Finkel, a 2025-27 Wallace Stegner Fellow in Fiction at Stanford University and writer from Philadelphia. Currently working on a novel." />
   
   <!-- Structured Data (Schema.org) for enhanced search results -->
@@ -68,23 +68,37 @@
     /* CSS Custom Properties for maintainability and easy theming */
     :root {
       --primary-gradient: linear-gradient(270deg, #333, #ccc, #333); /* Soft grayscale gradient for text */
-      --background-gradient: radial-gradient(circle at center, #fefefe, #e8e8e8, #f0f0f0, #e0e0e0); /* Updated to shades of white */
+      /* Updated to lighter shades of white with more explicit stops */
+      --background-gradient: radial-gradient(
+        circle at center,
+        #ffffff 0%,   /* Pure white */
+        #fcfcfc 20%,   /* Very light off-white */
+        #f8f8f8 40%,   /* Another very light off-white */
+        #f5f5f5 60%,   /* Slightly darker off-white */
+        #f2f2f2 80%,   /* Another step */
+        #efefef 100%   /* Darkest off-white for transition end */
+      );
       --animation-duration-fast: 15s;
       --animation-duration-slow: 40s;
       --text-color: #333; /* Softer dark grey for general text */
       --link-hover-color-default: #6c63ff; /* Original link hover color as a default */
-      --current-link-hover-color: var(--link-hover-color-default); /* Dynamic variable for link hover color */
+      --current-link-hover-color: var(
+        --link-hover-color-default
+      ); /* Dynamic variable for link hover color */
       --font-serif: 'Fraunces', serif;
       --font-sans: 'Inter', sans-serif; /* Modern sans-serif font for secondary text */
     }
 
     /* Universal reset for margin and padding */
-    *, *::before, *::after {
-        box-sizing: border-box;
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
     }
 
     /* Base styles for HTML and Body: Full viewport, flexbox centering, custom cursor */
-    html, body {
+    html,
+    body {
       margin: 0;
       height: 100%;
       font-family: var(--font-serif); /* Default font for main content */
@@ -100,6 +114,46 @@
       min-width: 100vw;
       position: relative;
       cursor: none !important; /* Force hides native cursor across the entire page */
+      /* FIX FOR BANDING: subtle blur, will-change */
+      filter: blur(0.1px); /* Apply a very subtle blur to smooth gradients */
+      transform: translateZ(0); /* Potentially forces hardware acceleration */
+      will-change: filter, transform, background-position; /* Hint for performance */
+    }
+
+    /* First pseudo-element for subtle noise/dithering to reduce banding */
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      /* Using the provided noise image for subtle dithering */
+      background-image: url('https://grainy-gradients.vercel.app/noise.png');
+      background-size: 40px 40px; /* Smaller tiling for finer grain */
+      pointer-events: none; /* Allows interaction with elements beneath */
+      z-index: 0; /* Lowest layer, just above the background */
+      opacity: 0.12; /* Increased opacity for more noticeable dithering */
+      mix-blend-mode: overlay; /* Stronger blend */
+      animation: grainAnimation 0.15s steps(2) infinite; /* Very subtle, fast, stepped animation for extra movement */
+    }
+
+    /* Second pseudo-element for additional noise/dithering layer */
+    body::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      /* Using the provided noise image for subtle dithering */
+      background-image: url('https://grainy-gradients.vercel.app/noise.png');
+      background-size: 80px 80px; /* Larger tiling for a different grain */
+      pointer-events: none; /* Allows interaction with elements beneath */
+      z-index: 1; /* Below content, above the first pseudo-element */
+      opacity: 0.20; /* Significantly increased opacity for more noticeable dithering */
+      mix-blend-mode: soft-light; /* Different blend mode for varied effect */
+      animation: grainAnimation 0.3s steps(3) infinite; /* Faster, more stepped animation */
     }
 
     /* Force hide native cursor for all anchor links */
@@ -197,35 +251,31 @@
     .body-italic,
     .stegner-link {
       position: relative;
-      /* By default, these links have the blending effect */
-      background: var(--primary-gradient);
-      background-size: 400% 400%;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      mix-blend-mode: difference; /* This creates the initial blended effect on links */
-      animation: gradientShift var(--animation-duration-fast) ease infinite; /* Links animate their own gradient */
-      
+      color: var(--text-color); /* Default to solid text color */
       text-decoration: none; /* No default underline */
       cursor: default; /* Overridden by global cursor: none */
-      transition: color 0.3s ease, opacity 0.3s ease, background 0.3s ease; /* Add background to transition for smooth changes */
+      transition: color 0.3s ease; /* Only transition color, not background */
+      /* Ensure no initial gradient-related properties affecting text color */
+      -webkit-background-clip: unset;
+      -webkit-text-fill-color: unset;
+      background-clip: unset;
+      mix-blend-mode: normal; /* Default to normal blend mode */
+      animation: none; /* No initial gradient animation */
     }
 
     /* Styles for hover state of specific links: Stegner Fellow and The Penn Review */
     .body-italic:hover,
     .stegner-link:hover {
-      /* On hover, switch to normal blending and solid color */
+      /* On hover, set text color to the current ball color */
       color: var(--current-link-hover-color) !important;
-      -webkit-text-fill-color: var(--current-link-hover-color) !important; /* Important for WebKit to get solid fill */
-      opacity: 1 !important; /* Ensure full opacity */
       
-      mix-blend-mode: normal !important; /* Crucial to break from parent's blend mode */
-      background: none !important; /* Remove the gradient background on hover for solid color */
-      background-color: transparent !important; /* Ensure no background color on hover */
-      
-      /* Reset clipping to ensure solid color is applied to the entire text area */
-      background-clip: border-box !important;
-      -webkit-background-clip: border-box !important;
+      /* Ensure no gradient properties are applied to the text itself on hover */
+      background: none !important;
+      -webkit-background-clip: unset !important;
+      -webkit-text-fill-color: unset !important;
+      background-clip: unset !important;
+      mix-blend-mode: normal !important;
+      animation: none !important;
     }
 
     /* Explicitly make body italic elements italic */
@@ -660,7 +710,7 @@
               clearInactivityTimer();
               stopBallAutonomousMovement(); // Stop autonomous, reset appearance
               
-              const newColor = primaryColors[currentColorIndex % primaryColors.length];
+              const newColor = primaryColors[currentColorIndex % primaryColors.length]; 
               customCursor.style.backgroundColor = newColor;
               customCursor.style.opacity = '1'; 
               document.documentElement.style.setProperty('--current-link-hover-color', newColor); 
