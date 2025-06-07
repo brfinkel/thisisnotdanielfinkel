@@ -201,22 +201,27 @@
 
     /* Common styles for italic and Stegner links */
     .body-italic,
-    .stegner-link {
-      position: relative;
-      /* Restored gradient for text fill */
-      background: var(--primary-gradient);
-      background-size: 400% 400%;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      /* Restored mix-blend-mode for link color effect */
-      mix-blend-mode: difference; 
-      animation: gradientShift var(--animation-duration-fast) ease infinite; /* Links animate their own gradient */
-      
-      text-decoration: none; /* No default underline */
-      cursor: default; /* Overridden by global cursor: none */
-      transition: color 0.3s ease, opacity 0.3s ease, background 0.3s ease; /* Smooth transition for color, opacity, background */
-    }
+.stegner-link {
+  position: relative;
+  /* Restored gradient for text fill */
+  background: var(--primary-gradient);
+  background-size: 400% 400%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  /* Restored mix-blend-mode for link color effect */
+  mix-blend-mode: difference; 
+  animation: gradientShift var(--animation-duration-fast) ease infinite; /* Links animate their own gradient */
+
+  text-decoration: none; /* No default underline */
+  cursor: default; /* Overridden by global cursor: none */
+  transition: color 0.3s ease, opacity 0.3s ease, background 0.3s ease; /* Smooth transition for color, opacity, background */
+
+  /* --- add these two lines below --- */
+  padding-left: 2px;
+  padding-right: 2px;
+  overflow: visible;
+}
 
     /* Styles for hover state of specific links: Stegner Fellow and The Penn Review */
     .body-italic:hover,
