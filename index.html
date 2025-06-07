@@ -163,9 +163,12 @@
       max-width: 1000px;
       line-height: 1.6; /* Generous line height for readability */
       text-align: left;
-      /* Removed properties that cause transparency/blending for consistent link behavior */
-      color: var(--text-color); /* Set explicit color for h1 text to ensure visibility */
-      animation: textSettle 1.5s ease-out forwards; /* Only textSettle animation remains */
+      
+      /* Using opacity for subtle transparency, simpler and more reliable for nested links */
+      color: var(--text-color); /* Base text color */
+      opacity: 0.7; /* Apply transparency to the entire H1 text block */
+      animation: textSettle 1.5s ease-out forwards;
+      
       word-break: break-word; /* Prevents long words from overflowing */
       overflow-wrap: break-word; /* Handles word wrapping */
       margin: 0; /* Important for correct flex centering */
@@ -195,17 +198,25 @@
     .body-italic,
     .stegner-link {
       position: relative;
-      color: var(--text-color); /* Explicitly set color for visible text */
+      color: var(--text-color); /* Initial text color */
       text-decoration: none; /* No default underline */
       cursor: default; /* Overridden by global cursor: none */
-      transition: color 0.3s ease; /* Smooth color change on hover */
+      transition: color 0.3s ease, opacity 0.3s ease; /* Smooth transition for color and opacity */
     }
 
-    /* Subtle hover color for links - now uses the dynamically set CSS variable */
+    /* Styles for hover state of specific links: Stegner Fellow and The Penn Review */
     .body-italic:hover,
     .stegner-link:hover {
-      color: var(--current-link-hover-color); 
-      opacity: 1; /* Make fully opaque on hover */
+      /* Force solid, vibrant color to match the ball */
+      color: var(--current-link-hover-color) !important;
+      opacity: 1 !important; /* Ensure full opacity */
+      
+      /* Reset any inherited properties that might cause transparency or blending */
+      -webkit-text-fill-color: var(--current-link-hover-color) !important; /* Important for WebKit to get solid fill */
+      background-clip: border-box !important;
+      -webkit-background-clip: border-box !important;
+      mix-blend-mode: normal !important; /* Crucial to break from parent's blend mode */
+      background: none !important; /* Ensure no background issues */
     }
 
     /* Explicitly make body italic elements italic */
@@ -228,6 +239,7 @@
       animation: gradientShift var(--animation-duration-fast) ease infinite;
       opacity: 0.5; /* Semi-transparent underline */
       transition: width 0.6s ease; /* Smooth transition for width change */
+      z-index: 1; /* Ensure underline is beneath the solid text */
     }
 
     /* Underline appears when the entire h1 is hovered */
@@ -442,7 +454,7 @@
               
               // Apply damping to velocity after bounce
               cursorVx *= screensaverDamping;
-              cursorVy *= screensaverDamping;
+              cursorVy *= screensaverDamping; 
 
               // Ensure a minimum speed to prevent stopping entirely
               const currentSpeed = Math.sqrt(cursorVx * cursorVx + cursorVy * cursorVy);
@@ -470,17 +482,24 @@
         isBallAutonomous = true;
         customCursor.style.opacity = '1'; // Always opaque when autonomous
         
-        // Ensure some velocity if it's currently stopped or too slow
+        // Ensure some velocity if it's currently stopped or too low
         const currentSpeed = Math.sqrt(cursorVx * cursorVx + cursorVy * cursorVy);
-        const minInitialSpeed = 2; // Minimum speed for autonomous movement
-        
-        // Reset velocity to a controlled random speed if too slow, otherwise scale down high velocity
-        if (currentSpeed < minInitialSpeed || currentSpeed > 10) { // Limit max initial speed to prevent erratic behavior
+        const minAutonomousSpeed = 3; // Minimum speed for autonomous movement
+        const maxAutonomousSpeed = 7; // Max speed for autonomous movement
+
+        if (currentSpeed < minAutonomousSpeed) {
+            // If speed is too low, give it a fresh random direction and a speed within a desired range
             const angle = Math.random() * Math.PI * 2;
-            const newSpeed = minInitialSpeed + Math.random() * 3; // Random speed between 2 and 5
+            const newSpeed = minAutonomousSpeed + Math.random() * (maxAutonomousSpeed - minAutonomousSpeed);
             cursorVx = Math.cos(angle) * newSpeed;
             cursorVy = Math.sin(angle) * newSpeed;
+        } else if (currentSpeed > maxAutonomousSpeed) {
+            // If speed is too high (e.g., from a quick flick), scale it down
+            const scaleFactor = maxAutonomousSpeed / currentSpeed;
+            cursorVx *= scaleFactor;
+            cursorVy *= scaleFactor;
         }
+        // If currentSpeed is within [minAutonomousSpeed, maxAutonomousSpeed], keep its current velocity.
       }
 
       // Stops autonomous movement and prepares for user control or idle state
@@ -525,7 +544,11 @@
       // Handles mousemove and touchmove to control the ball
       function handleMove(e) {
         clearInactivityTimer(); // Any interaction resets the inactivity timer
-        stopBallAutonomousMovement(e); // Stop autonomous movement, reset opacity/color to default
+
+        // If we're coming from an autonomous state, immediately stop it and revert appearance
+        if (isBallAutonomous) {
+            stopBallAutonomousMovement(e); // This will set isBallAutonomous to false and revert appearance
+        }
         
         customCursor.style.opacity = '1'; // Make ball opaque when user is interacting directly
 
@@ -569,9 +592,11 @@
       }
 
       function handleTouchEnd(e) {
-        startInactivityTimer(); // Start timer for autonomous movement after release
-        // On mobile, the ball will automatically become opaque and colored again when autonomous movement starts
-        // On desktop, it will revert to default semi-transparent if not over a link
+        // When touch ends, immediately switch to autonomous mode,
+        // retaining the last velocity from touchmove
+        startBallAutonomousMovement();
+        // The inactivity timer will naturally restart after this,
+        // or if the user doesn't touch again, the ball will continue bouncing.
       }
 
       function animateScrollEffect() {
@@ -634,8 +659,7 @@
           });
 
           link.addEventListener('touchend', () => {
-              // On touchend for links, the overall touchend handler will call startInactivityTimer.
-              // This will manage the ball's autonomous state and appearance.
+              // On touchend for links, the overall touchend handler will call startBallAutonomousMovement().
               // We only need to reset the link hover color property here.
               document.documentElement.style.setProperty('--current-link-hover-color', 'var(--link-hover-color-default)'); 
           });
