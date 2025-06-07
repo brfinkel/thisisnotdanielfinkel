@@ -67,8 +67,10 @@
   <style>
     /* CSS Custom Properties for maintainability and easy theming */
     :root {
-      --primary-gradient: linear-gradient(270deg, #333, #ccc, #333); /* Soft grayscale gradient for text */
-      --background-gradient: radial-gradient(circle at center, #fefefe, #e8e8e8, #f0f0f0, #e0e0e0); /* Updated to shades of white */
+      /* Updated primary-gradient with more color stops for smoother transitions */
+      --primary-gradient: linear-gradient(270deg, #333 0%, #666 25%, #999 50%, #ccc 75%, #333 100%);
+      /* Updated background-gradient with more subtle, varied shades for smoother transitions */
+      --background-gradient: radial-gradient(circle at center, #fefefe 0%, #f9f9f9 20%, #f0f0f0 40%, #e8e8e8 60%, #e0e0e0 80%, #d8d8d8 100%);
       --animation-duration-fast: 15s;
       --animation-duration-slow: 40s;
       --text-color: #333; /* Softer dark grey for general text */
@@ -201,27 +203,27 @@
 
     /* Common styles for italic and Stegner links */
     .body-italic,
-.stegner-link {
-  position: relative;
-  /* Restored gradient for text fill */
-  background: var(--primary-gradient);
-  background-size: 400% 400%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  /* Restored mix-blend-mode for link color effect */
-  mix-blend-mode: difference; 
-  animation: gradientShift var(--animation-duration-fast) ease infinite; /* Links animate their own gradient */
+    .stegner-link {
+      position: relative;
+      /* Restored gradient for text fill */
+      background: var(--primary-gradient);
+      background-size: 400% 400%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      /* Restored mix-blend-mode for link color effect */
+      mix-blend-mode: difference; 
+      animation: gradientShift var(--animation-duration-fast) ease infinite; /* Links animate their own gradient */
 
-  text-decoration: none; /* No default underline */
-  cursor: default; /* Overridden by global cursor: none */
-  transition: color 0.3s ease, opacity 0.3s ease, background 0.3s ease; /* Smooth transition for color, opacity, background */
+      text-decoration: none; /* No default underline */
+      cursor: default; /* Overridden by global cursor: none */
+      transition: color 0.3s ease, opacity 0.3s ease, background 0.3s ease; /* Smooth transition for color, opacity, background */
 
-  /* --- add these two lines below --- */
-  padding-left: 2px;
-  padding-right: 2px;
-  overflow: visible;
-}
+      /* --- add these two lines below --- */
+      padding-left: 2px;
+      padding-right: 2px;
+      overflow: visible;
+    }
 
     /* Styles for hover state of specific links: Stegner Fellow and The Penn Review */
     .body-italic:hover,
@@ -434,16 +436,17 @@
       ];
       let currentColorIndex = 0; 
 
-      // Cursor state variables
+      // Cursor state variables for autonomous movement
       let isBallAutonomous = false; // true when ball is bouncing on its own, false when user is interacting
-      let cursorX = window.innerWidth / 2; 
-      let cursorY = window.innerHeight / 2; 
-      let cursorVx = 0; 
-      let cursorVy = 0; 
+      let autonomousCursorX = window.innerWidth / 2; // Position for autonomous movement
+      let autonomousCursorY = window.innerHeight / 2; // Position for autonomous movement
+      let autonomousCursorVx = 0; // Velocity for autonomous movement
+      let autonomousCursorVy = 0; // Velocity for autonomous movement
       let cursorSize = 0; 
       
-      let lastClientX = cursorX; 
-      let lastClientY = cursorY; 
+      // Last known client X/Y for direct following when not autonomous
+      let lastClientX = window.innerWidth / 2; 
+      let lastClientY = window.innerHeight / 2; 
 
       const screensaverDamping = 0.7; 
 
@@ -458,32 +461,32 @@
       function mainAnimationLoop() {
         if (isBallAutonomous) {
           // Autonomous Mode: Update position and handle bouncing
-          cursorX += cursorVx;
-          cursorY += cursorVy;
+          autonomousCursorX += autonomousCursorVx;
+          autonomousCursorY += autonomousCursorVy;
 
           const maxX = window.innerWidth - cursorSize;
           const maxY = window.innerHeight - cursorSize;
           let bounced = false;
 
           // Bounce off horizontal walls
-          if (cursorX <= 0) {
-            cursorX = 0; 
-            cursorVx *= -1; 
+          if (autonomousCursorX <= 0) {
+            autonomousCursorX = 0; 
+            autonomousCursorVx *= -1; 
             bounced = true;
-          } else if (cursorX >= maxX) {
-            cursorX = maxX; 
-            cursorVx *= -1;
+          } else if (autonomousCursorX >= maxX) {
+            autonomousCursorX = maxX; 
+            autonomousCursorVx *= -1;
             bounced = true;
           }
 
           // Bounce off vertical walls
-          if (cursorY <= 0) {
-            cursorY = 0; 
-            cursorVy *= -1; 
+          if (autonomousCursorY <= 0) {
+            autonomousCursorY = 0; 
+            autonomousCursorVy *= -1; 
             bounced = true;
-          } else if (cursorY >= maxY) {
-            cursorY = maxY; 
-            cursorVy *= -1;
+          } else if (autonomousCursorY >= maxY) {
+            autonomousCursorY = maxY; 
+            autonomousCursorVy *= -1;
             bounced = true;
           }
 
@@ -493,22 +496,27 @@
               currentColorIndex++; 
               
               // Apply damping to velocity after bounce
-              cursorVx *= screensaverDamping;
-              cursorVy *= screensaverDamping; 
+              autonomousCursorVx *= screensaverDamping;
+              autonomousCursorVy *= screensaverDamping; 
 
               // Ensure a minimum speed to prevent stopping entirely
-              const currentSpeed = Math.sqrt(cursorVx * cursorVx + cursorVy * cursorVy);
+              const currentSpeed = Math.sqrt(autonomousCursorVx * autonomousCursorVx + autonomousCursorVy * autonomousCursorVy);
               const minSpeedAfterBounce = 1; 
               if (currentSpeed < minSpeedAfterBounce) {
                   const angle = Math.random() * Math.PI * 2;
-                  cursorVx = Math.cos(angle) * minSpeedAfterBounce;
-                  cursorVy = Math.sin(angle) * minSpeedAfterBounce;
+                  autonomousCursorVx = Math.cos(angle) * minSpeedAfterBounce;
+                  autonomousCursorVy = Math.sin(angle) * minSpeedAfterBounce;
               }
           }
-        } 
-        // Position update for both autonomous and user-controlled modes
-        customCursor.style.left = `${cursorX}px`;
-        customCursor.style.top = `${cursorY}px`;
+          // Apply autonomous position
+          customCursor.style.left = `${autonomousCursorX}px`;
+          customCursor.style.top = `${autonomousCursorY}px`;
+
+        } else {
+          // User-controlled mode: Directly follow the last known mouse/touch position
+          customCursor.style.left = `${lastClientX - (cursorSize / 2)}px`;
+          customCursor.style.top = `${lastClientY - (cursorSize / 2)}px`;
+        }
         
         animationId = requestAnimationFrame(mainAnimationLoop);
       }
@@ -521,9 +529,13 @@
 
         isBallAutonomous = true;
         customCursor.style.opacity = '1'; // Always opaque when autonomous
+
+        // When starting autonomous movement, initialize autonomousCursorX/Y from current visual position
+        autonomousCursorX = customCursor.offsetLeft;
+        autonomousCursorY = customCursor.offsetTop;
         
         // Ensure some velocity if it's currently stopped or too low
-        const currentSpeed = Math.sqrt(cursorVx * cursorVx + cursorVy * cursorVy);
+        const currentSpeed = Math.sqrt(autonomousCursorVx * autonomousCursorVx + autonomousCursorVy * autonomousCursorVy);
         const minAutonomousSpeed = 3; // Minimum speed for autonomous movement
         const maxAutonomousSpeed = 7; // Max speed for autonomous movement
 
@@ -531,13 +543,13 @@
             // If speed is too low, give it a fresh random direction and a speed within a desired range
             const angle = Math.random() * Math.PI * 2;
             const newSpeed = minAutonomousSpeed + Math.random() * (maxAutonomousSpeed - minAutonomousSpeed);
-            cursorVx = Math.cos(angle) * newSpeed;
-            cursorVy = Math.sin(angle) * newSpeed;
+            autonomousCursorVx = Math.cos(angle) * newSpeed;
+            autonomousCursorVy = Math.sin(angle) * newSpeed;
         } else if (currentSpeed > maxAutonomousSpeed) {
             // If speed is too high (e.g., from a quick flick), scale it down
             const scaleFactor = maxAutonomousSpeed / currentSpeed;
-            cursorVx *= scaleFactor;
-            cursorVy *= scaleFactor;
+            autonomousCursorVx *= scaleFactor;
+            autonomousCursorVy *= scaleFactor;
         }
         // If currentSpeed is within [minAutonomousSpeed, maxAutonomousSpeed], keep its current velocity.
       }
@@ -556,16 +568,19 @@
             customCursor.style.opacity = '0.5'; // Reset opacity to default semi-transparent
         }
         
-        // If an event is provided, snap cursor position to event coords
+        // When stopping autonomous, snap lastClientX/Y to the current event's coordinates.
+        // This ensures the direct follow mode starts from the correct point.
         if (e && (e.clientX !== undefined || (e.touches && e.touches[0] && e.touches[0].clientX !== undefined))) {
-            const clientX = e.clientX !== undefined ? e.clientX : e.touches[0].clientX;
-            const clientY = e.clientY !== undefined ? e.clientY : e.touches[0].clientY;
-            cursorX = clientX - (cursorSize / 2);
-            cursorY = clientY - (cursorSize / 2);
-            lastClientX = clientX; 
-            lastClientY = clientY; 
+            lastClientX = e.clientX !== undefined ? e.clientX : e.touches[0].clientX;
+            lastClientY = e.clientY !== undefined ? e.clientY : e.touches[0].clientY;
+        } else {
+            // Fallback for cases where event might not be available (e.g., mouseleave without explicit coords)
+            lastClientX = customCursor.offsetLeft + (cursorSize / 2);
+            lastClientY = customCursor.offsetTop + (cursorSize / 2);
         }
       }
+
+      // --- Inactivity Timer Management ---
 
       // Starts the inactivity timer for desktop (or mobile after touch ends)
       function startInactivityTimer() {
@@ -592,17 +607,9 @@
         
         customCursor.style.opacity = '1'; // Make ball opaque when user is interacting directly
 
-        const clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : lastClientX);
-        const clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : lastClientY);
-
-        cursorVx = clientX - lastClientX;
-        cursorVy = clientY - lastClientY;
-
-        cursorX = clientX - (cursorSize / 2);
-        cursorY = clientY - (cursorSize / 2);
-        
-        lastClientX = clientX; 
-        lastClientY = clientY; 
+        // Update lastClientX and lastClientY from the event
+        lastClientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : lastClientX);
+        lastClientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : lastClientY);
       }
 
       // --- Scroll "Budging" Effect Logic ---
@@ -738,13 +745,8 @@
             // The touch events (touchstart, touchend) will then manage switching between user control and autonomous
         }
 
-        // Initialize lastClientX/Y to current cursor position, adjusted for centering
-        const initialRect = customCursor.getBoundingClientRect();
-        lastClientX = initialRect.left + (cursorSize / 2);
-        lastClientY = initialRect.top + (cursorSize / 2);
-
-        // Start the main animation loop immediately
-        animationId = requestAnimationFrame(mainAnimationLoop);
+        // Start the main animation loop
+        mainAnimationLoop();
       }
     })();
   </script>
