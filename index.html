@@ -332,16 +332,40 @@
     @media (max-width: 700px) {
       h1 {
         font-size: clamp(1rem, 4.5vw, 1.4rem);
-        width: clamp(90vw, 95vw, 97vw);
-        max-width: 98vw;
-        padding: 0 2vw;
+        /* Adjusted width and padding to ensure text isn't clipped */
+        width: clamp(88vw, 92vw, 95vw); /* Slightly narrower max width */
+        padding: 0 max(16px, 4vw); /* Guarantees at least 16px padding on sides */
       }
       
       .contact-text {
         font-size: 0.65rem; 
         bottom: 8px;
-        right: 8px;
+        right: 8px; /* Keep it on the right */
+        left: auto; /* Remove conflicting 'left' property */
+        transform: none; /* Remove conflicting transform */
         gap: 8px; 
+        padding: 0 8px; /* Adjusted padding for better fit on small screens */
+        white-space: nowrap; /* Prevent wrapping */
+      }
+
+      /* Specific adjustments for .body-italic and .stegner-link on mobile when not hovered */
+      .body-italic,
+      .stegner-link {
+        /* On mobile, remove complex blend/gradient for stability when not hovered */
+        mix-blend-mode: normal; /* Force normal blend mode */
+        background: none; /* Remove gradient background */
+        background-color: transparent; /* Ensure no background color */
+        -webkit-background-clip: border-box; /* Reset clipping */
+        background-clip: border-box; /* Reset clipping */
+        color: var(--text-color); /* Force a solid default text color */
+        -webkit-text-fill-color: var(--text-color); /* For WebKit browsers */
+      }
+      
+      /* Ensure hover effect still applies to links on mobile */
+      .body-italic:hover,
+      .stegner-link:hover {
+        color: var(--current-link-hover-color) !important;
+        -webkit-text-fill-color: var(--current-link-hover-color) !important;
       }
       
       .contact-text a {
@@ -398,7 +422,7 @@
       const primaryColors = [
         'hsl(0, 80%, 55%)',    // Vibrant Red
         'hsl(200, 100%, 40%)', // Intense Blue
-        'hsl(45, 80%, 50%)',  // Richer Golden Yellow
+        'hsl(45, 80%, 50%)',   // Richer Golden Yellow
         'hsl(140, 70%, 45%)'   // Lively Green
       ];
       let currentColorIndex = 0; 
