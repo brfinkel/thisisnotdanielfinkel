@@ -198,7 +198,7 @@
     .body-italic,
     .stegner-link {
       position: relative;
-      color: inherit; /* Inherits text color from parent (h1) */
+      color: var(--text-color); /* Explicitly set color for visible text */
       text-decoration: none; /* No default underline */
       cursor: default; /* Overridden by global cursor: none */
       transition: color 0.3s ease; /* Smooth color change on hover */
@@ -215,7 +215,7 @@
       font-style: italic;
     }
 
-    /* Shared underline base styles for links (original behavior tied to h1 hover) */
+    /* Shared underline base styles for links (Original behavior tied to h1 hover) */
     .body-italic::after,
     .stegner-link::after {
       content: '';
@@ -336,6 +336,8 @@
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
+        transition-property: all !important; /* Apply to all transitionable properties */
+        transition-delay: 0s !important; /* No delay */
       }
     }
   </style>
@@ -380,22 +382,76 @@
       let currentColorIndex = 0; 
 
       // Screensaver variables
-      let isMouseOutsideWindow = false; 
+      let isMouseOutsideWindow = false; // Flag to indicate if mouse/touch is inactive (screensaver mode)
       let cursorX = window.innerWidth / 2; // Current X position of the dot's top-left
       let cursorY = window.innerHeight / 2; // Current Y position of the dot's top-left
       let cursorVx = 0; // X velocity (pixels per frame)
       let cursorVy = 0; // Y velocity (pixels per frame)
       let cursorSize = 0; // Size of the cursor dot, initialized on DOMContentLoaded
       
-      let lastClientX = cursorX; // Last recorded mouse X, for velocity calculation
-      let lastClientY = cursorY; // Last recorded mouse Y, for velocity calculation
+      let lastClientX = cursorX; // Last recorded mouse/touch X, for velocity calculation
+      let lastClientY = cursorY; // Last recorded mouse/touch Y, for velocity calculation
 
       // New: Damping factor for screensaver bounce
       const screensaverDamping = 0.7; // Decreased value for more damping, making it feel heavier
 
+      // Inactivity timer for screensaver activation
+      let inactivityTimeoutId = null;
+      const INACTIVITY_DELAY_MS = 3000; // 3 seconds of inactivity before screensaver activates
+
+      // --- Screensaver & Inactivity Management ---
+      function startInactivityTimer() {
+        clearTimeout(inactivityTimeoutId); // Clear any existing timer
+        inactivityTimeoutId = setTimeout(activateScreensaver, INACTIVITY_DELAY_MS);
+      }
+
+      function clearInactivityTimer(e) {
+        clearTimeout(inactivityTimeoutId);
+        inactivityTimeoutId = null;
+        deactivateScreensaver(e); // Immediately deactivate screensaver if active
+      }
+
+      function activateScreensaver() {
+        if (!isMouseOutsideWindow) { // Only activate if not already active
+          isMouseOutsideWindow = true;
+          // Ensure velocity is set for initial movement
+          const minInitialSpeed = 2;
+          const maxDesiredSpeed = 5;
+          const currentSpeed = Math.sqrt(cursorVx * cursorVx + cursorVy * cursorVy);
+
+          if (currentSpeed < minInitialSpeed) {
+            cursorVx = (Math.random() > 0.5 ? 1 : -1) * (minInitialSpeed + Math.random() * 3);
+            cursorVy = (Math.random() > 0.5 ? 1 : -1) * (minInitialSpeed + Math.random() * 3);
+          } else if (currentSpeed > maxDesiredSpeed) {
+            const scaleFactor = maxDesiredSpeed / currentSpeed;
+            cursorVx *= scaleFactor;
+            cursorVy *= scaleFactor;
+          }
+          console.log('Screensaver: Activated.');
+        }
+      }
+
+      function deactivateScreensaver(e) {
+        if (isMouseOutsideWindow) { // Only deactivate if currently active
+          isMouseOutsideWindow = false;
+          customCursor.style.backgroundColor = 'rgba(0, 0, 0, 0.5)'; // Reset cursor color to default
+          customCursor.style.opacity = '0.5'; // Reset cursor opacity to default
+
+          // Snap cursor to event position if available (mouse or touch), otherwise last known.
+          if (e && (e.clientX !== undefined || (e.touches && e.touches[0] && e.touches[0].clientX !== undefined))) {
+            const clientX = e.clientX !== undefined ? e.clientX : e.touches[0].clientX;
+            const clientY = e.clientY !== undefined ? e.clientY : e.touches[0].clientY;
+            cursorX = clientX - (cursorSize / 2);
+            cursorY = clientY - (cursorSize / 2);
+            lastClientX = clientX; // Also update lastClientX/Y for correct velocity calculation later
+            lastClientY = clientY;
+          }
+          console.log('Screensaver: Deactivated.');
+        }
+      }
 
       // --- Main Animation Loop ---
-      // This single loop handles both mouse-following and screensaver bouncing.
+      // This single loop handles both mouse-following/touch-following and screensaver bouncing.
       function mainAnimationLoop() {
         if (isMouseOutsideWindow) {
           // Screensaver Mode: Update position and handle bouncing
@@ -454,7 +510,7 @@
           }
 
         } else {
-          // Mouse-Following Mode: Cursor position is already updated by mousemove, just apply it
+          // Mouse/Touch-Following Mode: Cursor position is already updated by events, just apply it
           customCursor.style.left = `${cursorX}px`;
           customCursor.style.top = `${cursorY}px`;
         }
@@ -462,93 +518,34 @@
         animationId = requestAnimationFrame(mainAnimationLoop);
       }
 
-      // --- Custom Cursor Positioning Logic (Updates internal X/Y and velocity based on mouse) ---
-      function handleMouseMove(e) {
+      // --- Custom Cursor Positioning Logic (Updates internal X/Y and velocity based on mouse/touch) ---
+      function handleMove(e) {
+        clearInactivityTimer(e); // Reset inactivity timer on any movement
         if (!isMouseOutsideWindow) { // Only update if not in screensaver mode
+          const clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : lastClientX);
+          const clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : lastClientY);
+
           // Calculate instantaneous velocity
-          cursorVx = e.clientX - lastClientX;
-          cursorVy = e.clientY - lastClientY;
+          cursorVx = clientX - lastClientX;
+          cursorVy = clientY - lastClientY;
 
           // Update cursor position
-          cursorX = e.clientX - (cursorSize / 2);
-          cursorY = e.clientY - (cursorSize / 2);
+          cursorX = clientX - (cursorSize / 2);
+          cursorY = clientY - (cursorSize / 2);
           
           // Store current position for next velocity calculation
-          lastClientX = e.clientX; 
-          lastClientY = e.clientY; 
+          lastClientX = clientX; 
+          lastClientY = clientY; 
         }
       }
 
-      // --- Screensaver Activation/Deactivation ---
-      // This function is called when the mouse leaves the document body or the window loses focus.
-      function activateScreensaver() {
-        if (!isMouseOutsideWindow) {
-          isMouseOutsideWindow = true;
-          cancelAnimationFrame(animationId); // Stop current loop before re-starting
-
-          // Ensure it starts within window bounds, using current (last known mouse) position
-          const maxX = window.innerWidth - cursorSize;
-          const maxY = window.innerHeight - cursorSize;
-          cursorX = Math.max(0, Math.min(cursorX, maxX));
-          cursorY = Math.max(0, Math.min(cursorY, maxY));
-          
-          // Apply this immediate position update to prevent jump before screensaver starts
-          customCursor.style.left = `${cursorX}px`;
-          customCursor.style.top = `${cursorY}px`;
-
-          // Check if velocity is negligible; if so, assign a small random initial velocity
-          const minInitialSpeed = 2; // Minimum speed for screensaver to ensure movement
-          const maxDesiredSpeed = 5; // Max speed for screensaver
-          const currentSpeed = Math.sqrt(cursorVx * cursorVx + cursorVy * cursorVy);
-
-          if (currentSpeed < minInitialSpeed) {
-              // Give a random, minimum nudge if mouse was still
-              cursorVx = (Math.random() > 0.5 ? 1 : -1) * (minInitialSpeed + Math.random() * 3); // 2-5 pixels/frame
-              cursorVy = (Math.random() > 0.5 ? 1 : -1) * (minInitialSpeed + Math.random() * 3); // 2-5 pixels/frame
-          } else if (currentSpeed > maxDesiredSpeed) {
-              // Scale down velocity if it's too high for aesthetic reasons
-              const scaleFactor = maxDesiredSpeed / currentSpeed;
-              cursorVx *= scaleFactor;
-              cursorVy *= scaleFactor;
-          }
-          // If currentSpeed is between minInitialSpeed and maxDesiredSpeed, use it as is.
-
-          animationId = requestAnimationFrame(mainAnimationLoop); // Restart the loop in screensaver mode
-          console.log('Screensaver: Activated.');
-        }
-      }
-
-      // This function is called when the mouse enters the document body or the window gains focus.
-      function deactivateScreensaver(e) {
-        if (isMouseOutsideWindow) {
-          isMouseOutsideWindow = false;
-          cancelAnimationFrame(animationId); // Stop screensaver mode
-          
-          // Reset cursor color to default when deactivating screensaver
-          customCursor.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-
-          // Snap cursor back to mouse position (use event coordinates if available, otherwise last known)
-          if (e && (e.clientX !== undefined && e.clientY !== undefined)) { 
-              cursorX = e.clientX - (cursorSize / 2);
-              cursorY = e.clientY - (cursorSize / 2);
-          } else { 
-              // Fallback: use last known mouse position when re-entering without a direct mouse event
-              cursorX = lastClientX - (cursorSize / 2); 
-              cursorY = lastClientY - (cursorSize / 2);
-          }
-          customCursor.style.left = `${cursorX}px`;
-          customCursor.style.top = `${cursorY}px`;
-
-          animationId = requestAnimationFrame(mainAnimationLoop); // Restart the loop in mouse-following mode
-          console.log('Screensaver: Deactivated.');
-        }
-      }
-      
       // --- Scroll "Budging" Effect Logic ---
       const h1 = document.querySelector('h1'); 
+      let initialTouchY = 0; // For tracking vertical swipe distance
 
       function handleWheel(e) {
         e.preventDefault(); 
+        startInactivityTimer(); // Reset inactivity timer on scroll
         
         targetScrollOffset += -e.deltaY * scrollSensitivity;
         targetScrollOffset = Math.max(-scrollAmplitude, Math.min(scrollAmplitude, targetScrollOffset));
@@ -557,6 +554,35 @@
           rAFScroll = requestAnimationFrame(animateScrollEffect);
         }
       }
+
+      function handleTouchStart(e) {
+        initialTouchY = e.touches[0].clientY;
+        clearInactivityTimer(e); // Reset inactivity timer on touch start
+      }
+
+      function handleTouchMove(e) {
+        e.preventDefault(); // Prevent native scrolling to allow custom budging effect
+        startInactivityTimer(); // Reset inactivity timer on touch move
+
+        const touchDeltaY = e.touches[0].clientY - initialTouchY;
+        targetScrollOffset += touchDeltaY * scrollSensitivity;
+        targetScrollOffset = Math.max(-scrollAmplitude, Math.min(scrollAmplitude, targetScrollOffset));
+        
+        initialTouchY = e.touches[0].clientY; // Update for next move calculation
+
+        if (!rAFScroll) {
+          rAFScroll = requestAnimationFrame(animateScrollEffect);
+        }
+
+        // Also update cursor position based on touch
+        handleMove(e);
+      }
+
+      function handleTouchEnd(e) {
+        startInactivityTimer(); // Reset inactivity timer on touch end
+        // No explicit cursor movement needed here as it stops when touch ends
+      }
+
 
       function animateScrollEffect() {
         const delta = targetScrollOffset - scrollOffset;
@@ -600,6 +626,20 @@
               customCursor.style.opacity = '0.5'; 
             }
           });
+
+          // Add touch equivalents for hover effect
+          link.addEventListener('touchstart', () => {
+              customCursor.style.backgroundColor = primaryColors[currentColorIndex % primaryColors.length];
+              customCursor.style.opacity = '1'; 
+              currentColorIndex++; 
+          });
+
+          link.addEventListener('touchend', () => {
+              if (!isMouseOutsideWindow) {
+                  customCursor.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+                  customCursor.style.opacity = '0.5'; 
+              }
+          });
         });
       }
 
@@ -613,17 +653,27 @@
       function setupListeners() {
         cursorSize = customCursor.offsetWidth; 
 
-        document.addEventListener('mousemove', handleMouseMove, { passive: true }); 
+        // Mouse events
+        document.addEventListener('mousemove', handleMove, { passive: true }); 
         window.addEventListener('wheel', handleWheel, { passive: false }); 
+        
+        // Touch events
+        document.addEventListener('touchstart', handleTouchStart, { passive: false });
+        document.addEventListener('touchmove', handleTouchMove, { passive: false });
+        document.addEventListener('touchend', handleTouchEnd, { passive: false });
+
         initializeCursorLinkHover(); 
         
         // Primary triggers for screensaver activation/deactivation
         document.body.addEventListener('mouseleave', activateScreensaver);
-        document.body.addEventListener('mouseenter', deactivateScreensaver);
+        document.body.addEventListener('mouseenter', clearInactivityTimer); // Use clearInactivityTimer for re-entry
 
         // Robust fallbacks for window blur/focus (e.g., tab switching, minimizing)
         window.addEventListener('blur', activateScreensaver);
-        window.addEventListener('focus', deactivateScreensaver);
+        window.addEventListener('focus', clearInactivityTimer);
+
+        // Start inactivity timer on initial load
+        startInactivityTimer();
 
         // Initialize lastClientX/Y to current cursor position, adjusted for centering
         // This ensures the velocity calculation is accurate from the very start
