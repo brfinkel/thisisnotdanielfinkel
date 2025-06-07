@@ -109,17 +109,17 @@
     /* Custom cursor styles: Fixed position, small dot, smooth transitions */
     .custom-cursor {
       position: fixed;
-      top: 0;
+      /* Left and top are now directly controlled by JavaScript for precise positioning */
       left: 0;
-      width: 8px; /* Size of the custom dot */
-      height: 8px;
+      top: 0;
+      width: 12px; /* Increased size for better visibility as a "ball" */
+      height: 12px; /* Increased size for better visibility as a "ball" */
       background-color: rgba(0, 0, 0, 0.5); /* Default semi-transparent black */
       border-radius: 50%; /* Makes it a perfect circle */
       pointer-events: none; /* Allows mouse events to pass through to elements beneath */
       z-index: 9999; /* Ensures it's always on top */
-      transform: translate(-50%, -50%); /* Centers the dot precisely on the cursor's coordinates */
       transition: background-color 0.2s ease-out, opacity 0.2s ease-out; /* Smooth color and opacity changes */
-      will-change: transform, background-color, opacity; /* Performance hint for browser */
+      will-change: left, top, background-color, opacity; /* Performance hint for browser */
     }
 
     /* Keyframe animation for the background gradient shift */
@@ -297,6 +297,9 @@
       font-family: var(--font-sans);
       position: relative;
       display: inline-block; /* Required for transform to work correctly on inline elements */
+      /* New: Larger clickable area using padding */
+      padding: 5px 8px; /* Adds padding to increase hover area */
+      margin: -5px -8px; /* Negative margin to offset padding and maintain original visual position */
     }
 
     /* Hover effect for contact links: lift, scale, and full opacity */
@@ -358,123 +361,278 @@
       'use strict';
       
       const customCursor = document.querySelector('.custom-cursor');
-      let rAFCursor; // RequestAnimationFrame ID for custom cursor position update
-      let rAFScroll; // RequestAnimationFrame ID for scroll budging effect
+      let animationId; // Single requestAnimationFrame ID for the main animation loop
 
-      let scrollOffset = 0; // Current actual vertical offset of h1 (for budging)
-      let targetScrollOffset = 0; // Desired vertical offset from mouse wheel input
-      const scrollAmplitude = 80; // Maximum vertical movement in pixels for budging
-      const scrollSensitivity = 0.6; // How much mouse wheel delta affects the target offset
-      const scrollDamping = 0.08; // How quickly the text returns to center (damping effect)
-      const scrollSpring = 0.5; // How quickly the text moves towards the target offset (spring effect)
+      let scrollOffset = 0; 
+      let targetScrollOffset = 0; 
+      const scrollAmplitude = 80; 
+      const scrollSensitivity = 0.6; 
+      const scrollDamping = 0.08; 
+      const scrollSpring = 0.5; 
+      let rAFScroll; // RequestAnimationFrame ID for the scroll effect
 
-      // Define primary colors for cursor cycling (HSL for easy hue rotation and brightness control)
       const primaryColors = [
         'hsl(0, 80%, 55%)',    // Vibrant Red
         'hsl(200, 100%, 40%)', // Intense Blue
         'hsl(50, 100%, 55%)',  // Vibrant Yellow (more contrast)
         'hsl(140, 70%, 45%)'   // Lively Green
       ];
-      let currentColorIndex = 0; // Index to cycle through primaryColors
+      let currentColorIndex = 0; 
 
-      // --- Custom Cursor Positioning Logic ---
-      // Uses requestAnimationFrame for smooth, browser-optimized cursor movement
-      function updateCursor(e) {
-        // Prevent multiple rAF calls if one is already pending
-        if (rAFCursor) return;
-        rAFCursor = requestAnimationFrame(() => {
-          customCursor.style.left = `${e.clientX}px`;
-          customCursor.style.top = `${e.clientY}px`;
-          rAFCursor = null; // Reset rAF ID after execution
-        });
+      // Screensaver variables
+      let isMouseOutsideWindow = false; 
+      let cursorX = window.innerWidth / 2; // Current X position of the dot's top-left
+      let cursorY = window.innerHeight / 2; // Current Y position of the dot's top-left
+      let cursorVx = 0; // X velocity (pixels per frame)
+      let cursorVy = 0; // Y velocity (pixels per frame)
+      let cursorSize = 0; // Size of the cursor dot, initialized on DOMContentLoaded
+      
+      let lastClientX = cursorX; // Last recorded mouse X, for velocity calculation
+      let lastClientY = cursorY; // Last recorded mouse Y, for velocity calculation
+
+      // New: Damping factor for screensaver bounce
+      const screensaverDamping = 0.7; // Decreased value for more damping, making it feel heavier
+
+
+      // --- Main Animation Loop ---
+      // This single loop handles both mouse-following and screensaver bouncing.
+      function mainAnimationLoop() {
+        if (isMouseOutsideWindow) {
+          // Screensaver Mode: Update position and handle bouncing
+          cursorX += cursorVx;
+          cursorY += cursorVy;
+
+          const maxX = window.innerWidth - cursorSize;
+          const maxY = window.innerHeight - cursorSize;
+          let bounced = false;
+
+          // Bounce off horizontal walls
+          if (cursorX <= 0) {
+            cursorX = 0; 
+            cursorVx *= -1; 
+            bounced = true;
+          } else if (cursorX >= maxX) {
+            cursorX = maxX; 
+            cursorVx *= -1;
+            bounced = true;
+          }
+
+          // Bounce off vertical walls
+          if (cursorY <= 0) {
+            cursorY = 0; 
+            cursorVy *= -1; 
+            bounced = true;
+          } else if (cursorY >= maxY) {
+            cursorY = maxY; 
+            cursorVy *= -1;
+            bounced = true;
+          }
+
+          customCursor.style.left = `${cursorX}px`;
+          customCursor.style.top = `${cursorY}px`;
+
+          if (bounced) {
+              // Change color on bounce
+              customCursor.style.backgroundColor = primaryColors[currentColorIndex % primaryColors.length];
+              currentColorIndex++; 
+              
+              // Apply damping to velocity after bounce
+              cursorVx *= screensaverDamping;
+              cursorVy *= screensaverDamping;
+
+              // Ensure a minimum speed to prevent stopping entirely
+              const currentSpeed = Math.sqrt(cursorVx * cursorVx + cursorVy * cursorVy);
+              const minSpeedAfterBounce = 1; // Minimum speed after damping
+              if (currentSpeed < minSpeedAfterBounce) {
+                  // If speed falls below minimum, reset to a small random speed
+                  const angle = Math.random() * Math.PI * 2;
+                  cursorVx = Math.cos(angle) * minSpeedAfterBounce;
+                  cursorVy = Math.sin(angle) * minSpeedAfterBounce;
+              }
+
+              console.log(`Screensaver: BOUNCE! New Vx: ${cursorVx.toFixed(1)}, Vy: ${cursorVy.toFixed(1)}. Pos: (${cursorX.toFixed(1)}, ${cursorY.toFixed(1)})`);
+          }
+
+        } else {
+          // Mouse-Following Mode: Cursor position is already updated by mousemove, just apply it
+          customCursor.style.left = `${cursorX}px`;
+          customCursor.style.top = `${cursorY}px`;
+        }
+        
+        animationId = requestAnimationFrame(mainAnimationLoop);
       }
 
+      // --- Custom Cursor Positioning Logic (Updates internal X/Y and velocity based on mouse) ---
+      function handleMouseMove(e) {
+        if (!isMouseOutsideWindow) { // Only update if not in screensaver mode
+          // Calculate instantaneous velocity
+          cursorVx = e.clientX - lastClientX;
+          cursorVy = e.clientY - lastClientY;
+
+          // Update cursor position
+          cursorX = e.clientX - (cursorSize / 2);
+          cursorY = e.clientY - (cursorSize / 2);
+          
+          // Store current position for next velocity calculation
+          lastClientX = e.clientX; 
+          lastClientY = e.clientY; 
+        }
+      }
+
+      // --- Screensaver Activation/Deactivation ---
+      // This function is called when the mouse leaves the document body or the window loses focus.
+      function activateScreensaver() {
+        if (!isMouseOutsideWindow) {
+          isMouseOutsideWindow = true;
+          cancelAnimationFrame(animationId); // Stop current loop before re-starting
+
+          // Ensure it starts within window bounds, using current (last known mouse) position
+          const maxX = window.innerWidth - cursorSize;
+          const maxY = window.innerHeight - cursorSize;
+          cursorX = Math.max(0, Math.min(cursorX, maxX));
+          cursorY = Math.max(0, Math.min(cursorY, maxY));
+          
+          // Apply this immediate position update to prevent jump before screensaver starts
+          customCursor.style.left = `${cursorX}px`;
+          customCursor.style.top = `${cursorY}px`;
+
+          // Check if velocity is negligible; if so, assign a small random initial velocity
+          const minInitialSpeed = 2; // Minimum speed for screensaver to ensure movement
+          const maxDesiredSpeed = 5; // Max speed for screensaver
+          const currentSpeed = Math.sqrt(cursorVx * cursorVx + cursorVy * cursorVy);
+
+          if (currentSpeed < minInitialSpeed) {
+              // Give a random, minimum nudge if mouse was still
+              cursorVx = (Math.random() > 0.5 ? 1 : -1) * (minInitialSpeed + Math.random() * 3); // 2-5 pixels/frame
+              cursorVy = (Math.random() > 0.5 ? 1 : -1) * (minInitialSpeed + Math.random() * 3); // 2-5 pixels/frame
+          } else if (currentSpeed > maxDesiredSpeed) {
+              // Scale down velocity if it's too high for aesthetic reasons
+              const scaleFactor = maxDesiredSpeed / currentSpeed;
+              cursorVx *= scaleFactor;
+              cursorVy *= scaleFactor;
+          }
+          // If currentSpeed is between minInitialSpeed and maxDesiredSpeed, use it as is.
+
+          animationId = requestAnimationFrame(mainAnimationLoop); // Restart the loop in screensaver mode
+          console.log('Screensaver: Activated.');
+        }
+      }
+
+      // This function is called when the mouse enters the document body or the window gains focus.
+      function deactivateScreensaver(e) {
+        if (isMouseOutsideWindow) {
+          isMouseOutsideWindow = false;
+          cancelAnimationFrame(animationId); // Stop screensaver mode
+          
+          // Reset cursor color to default when deactivating screensaver
+          customCursor.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+
+          // Snap cursor back to mouse position (use event coordinates if available, otherwise last known)
+          if (e && (e.clientX !== undefined && e.clientY !== undefined)) { 
+              cursorX = e.clientX - (cursorSize / 2);
+              cursorY = e.clientY - (cursorSize / 2);
+          } else { 
+              // Fallback: use last known mouse position when re-entering without a direct mouse event
+              cursorX = lastClientX - (cursorSize / 2); 
+              cursorY = lastClientY - (cursorSize / 2);
+          }
+          customCursor.style.left = `${cursorX}px`;
+          customCursor.style.top = `${cursorY}px`;
+
+          animationId = requestAnimationFrame(mainAnimationLoop); // Restart the loop in mouse-following mode
+          console.log('Screensaver: Deactivated.');
+        }
+      }
+      
       // --- Scroll "Budging" Effect Logic ---
-      const h1 = document.querySelector('h1'); // Cache h1 element for efficiency
+      const h1 = document.querySelector('h1'); 
 
-      // Handles mouse wheel events to initiate the budging effect
       function handleWheel(e) {
-        e.preventDefault(); // Prevent default browser scrolling behavior
-
-        // Adjust the target offset based on the mouse wheel delta (vertical scroll amount)
+        e.preventDefault(); 
+        
         targetScrollOffset += -e.deltaY * scrollSensitivity;
-        // Clamp the target offset within the defined amplitude to prevent excessive movement
         targetScrollOffset = Math.max(-scrollAmplitude, Math.min(scrollAmplitude, targetScrollOffset));
 
-        // If animation is not already running, start the animation loop
-        if (!rAFScroll) {
+        if (!rAFScroll) { // Only start a new animation frame if one isn't already running
           rAFScroll = requestAnimationFrame(animateScrollEffect);
         }
       }
 
-      // The main animation loop for the scroll budging effect
       function animateScrollEffect() {
-        // Calculate the difference between target and current offset (spring effect)
         const delta = targetScrollOffset - scrollOffset;
         scrollOffset += delta * scrollSpring;
 
-        // Apply damping to gradually bring the target offset back to zero over time
-        // This ensures the text "settles" back to its original position
+        // Apply damping to targetScrollOffset to bring it back to zero
         targetScrollOffset *= (1 - scrollDamping);
 
-        // Stop the animation loop if the movement is visually imperceptible
-        // This saves CPU cycles when no active animation is needed
+        // Stop animation if values are very close to zero
         if (Math.abs(delta) < 0.1 && Math.abs(targetScrollOffset) < 0.1) {
-          scrollOffset = 0; // Snap to zero to ensure exact reset
+          scrollOffset = 0; 
           targetScrollOffset = 0;
           if (h1) { 
-            // Reset h1 transform to 'none' to allow flexbox to perfectly center it
-            h1.style.transform = `none`; 
+            h1.style.transform = `none`; // Reset transform once animation is complete
           }
-          rAFScroll = null; // Stop the animation loop
+          rAFScroll = null; // Clear the animation frame ID
           return;
         }
 
-        // Apply the calculated vertical transform to the h1 element
         if (h1) { 
           h1.style.transform = `translateY(${scrollOffset}px)`;
         }
         
-        // Continue the animation loop
         rAFScroll = requestAnimationFrame(animateScrollEffect);
       }
       
       // --- Custom Cursor Link Hover Color & Opacity Logic ---
-      // Changes the custom cursor's color and opacity when hovering over any link
       function initializeCursorLinkHover() {
-        const allLinks = document.querySelectorAll('a'); // Get all anchor tags once
+        const allLinks = document.querySelectorAll('a'); 
 
         allLinks.forEach(link => {
-          // When mouse enters a link
           link.addEventListener('mouseenter', () => {
-            // Set background color to the next primary color in the cycle
             customCursor.style.backgroundColor = primaryColors[currentColorIndex % primaryColors.length];
-            customCursor.style.opacity = '1'; // Make cursor fully opaque
-            currentColorIndex++; // Move to the next color for the next link hover
+            customCursor.style.opacity = '1'; 
+            currentColorIndex++; 
           });
 
-          // When mouse leaves a link
           link.addEventListener('mouseleave', () => {
-            // Reset cursor to default color and opacity
-            customCursor.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-            customCursor.style.opacity = '0.5'; 
+            if (!isMouseOutsideWindow) { // Only revert to default if not in screensaver mode
+              customCursor.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+              customCursor.style.opacity = '0.5'; 
+            }
           });
         });
       }
 
       // --- Initialization on DOM Ready ---
-      // Ensures all elements are loaded before attaching event listeners
       if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
-          document.addEventListener('mousemove', updateCursor, { passive: true }); // Cursor position
-          window.addEventListener('wheel', handleWheel, { passive: false }); // Scroll budging
-          initializeCursorLinkHover(); // Cursor color/opacity on link hover
-        });
+        document.addEventListener('DOMContentLoaded', setupListeners);
       } else {
-        // If DOM is already loaded (e.g., script loaded asynchronously or page was pre-rendered)
-        document.addEventListener('mousemove', updateCursor, { passive: true });
-        window.addEventListener('wheel', handleWheel, { passive: false });
-        initializeCursorLinkHover();
+        setupListeners();
+      }
+
+      function setupListeners() {
+        cursorSize = customCursor.offsetWidth; 
+
+        document.addEventListener('mousemove', handleMouseMove, { passive: true }); 
+        window.addEventListener('wheel', handleWheel, { passive: false }); 
+        initializeCursorLinkHover(); 
+        
+        // Primary triggers for screensaver activation/deactivation
+        document.body.addEventListener('mouseleave', activateScreensaver);
+        document.body.addEventListener('mouseenter', deactivateScreensaver);
+
+        // Robust fallbacks for window blur/focus (e.g., tab switching, minimizing)
+        window.addEventListener('blur', activateScreensaver);
+        window.addEventListener('focus', deactivateScreensaver);
+
+        // Initialize lastClientX/Y to current cursor position, adjusted for centering
+        // This ensures the velocity calculation is accurate from the very start
+        const initialRect = customCursor.getBoundingClientRect();
+        lastClientX = initialRect.left + (cursorSize / 2);
+        lastClientY = initialRect.top + (cursorSize / 2);
+
+        // Start the main animation loop immediately
+        animationId = requestAnimationFrame(mainAnimationLoop);
       }
     })();
   </script>
