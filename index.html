@@ -164,6 +164,7 @@
     /* Custom cursor styles: Fixed position, small dot, smooth transitions */
     .custom-cursor {
       position: fixed;
+      /* Left and top are now directly controlled by JavaScript for precise positioning */
       left: 0;
       top: 0;
       width: 12px; /* Increased size for better visibility as a "ball" */
@@ -174,9 +175,6 @@
       z-index: 9999; /* Ensures it's always on top */
       transition: background-color 0.2s ease-out, opacity 0.2s ease-out; /* Smooth color and opacity changes */
       will-change: left, top, background-color, opacity; /* Performance hint for browser */
-      /* Initially hidden */
-      opacity: 0;
-      visibility: hidden;
     }
 
     /* Keyframe animation for the background gradient shift */
@@ -475,9 +473,6 @@
       // Detect mobile device more reliably
       const isMobileDevice = /Mobi|Android/i.test(navigator.userAgent) || ('ontouchstart' in window);
 
-      // Flag to track if user has interacted at least once
-      let hasUserInteracted = false;
-
       // --- Main Animation Loop ---
       function mainAnimationLoop() {
         if (isBallAutonomous) {
@@ -607,19 +602,6 @@
 
       // Handles mousemove and touchmove to control the ball
       function handleMove(e) {
-        if (!hasUserInteracted) {
-          customCursor.style.opacity = '1';
-          customCursor.style.visibility = 'visible';
-          hasUserInteracted = true;
-          animationId = requestAnimationFrame(mainAnimationLoop); // Start the animation loop on first interaction
-          if (!isMobileDevice) {
-            document.body.addEventListener('mouseleave', startBallAutonomousMovement);
-            document.body.addEventListener('mouseenter', stopBallAutonomousMovement);
-            window.addEventListener('blur', startBallAutonomousMovement);
-            window.addEventListener('focus', stopBallAutonomousMovement);
-          }
-        }
-
         clearInactivityTimer(); // Any interaction resets the inactivity timer
 
         // If we're coming from an autonomous state, immediately stop it and revert appearance
@@ -647,18 +629,6 @@
       let initialTouchY = 0; // For tracking vertical swipe distance
 
       function handleWheel(e) {
-        if (!hasUserInteracted) {
-          customCursor.style.opacity = '1';
-          customCursor.style.visibility = 'visible';
-          hasUserInteracted = true;
-          animationId = requestAnimationFrame(mainAnimationLoop); // Start the animation loop on first interaction
-          if (!isMobileDevice) {
-            document.body.addEventListener('mouseleave', startBallAutonomousMovement);
-            document.body.addEventListener('mouseenter', stopBallAutonomousMovement);
-            window.addEventListener('blur', startBallAutonomousMovement);
-            window.addEventListener('focus', stopBallAutonomousMovement);
-          }
-        }
         e.preventDefault(); 
         clearInactivityTimer(); // Interaction resets timer
         
@@ -671,12 +641,6 @@
       }
 
       function handleTouchStart(e) {
-        if (!hasUserInteracted) {
-          customCursor.style.opacity = '1';
-          customCursor.style.visibility = 'visible';
-          hasUserInteracted = true;
-          animationId = requestAnimationFrame(mainAnimationLoop); // Start the animation loop on first interaction
-        }
         initialTouchY = e.touches[0].clientY;
         handleMove(e); // Use handleMove for initial position and velocity setup
       }
@@ -690,7 +654,8 @@
         // When touch ends, immediately switch to autonomous mode,
         // retaining the last velocity from touchmove
         startBallAutonomousMovement();
-        startInactivityTimer(); // Mobile: Start inactivity timer after touch ends
+        // The inactivity timer will naturally restart after this,
+        // or if the user doesn't touch again, the ball will continue bouncing.
       }
 
       function animateScrollEffect() {
@@ -770,18 +735,35 @@
       function setupListeners() {
         cursorSize = customCursor.offsetWidth; 
 
-        // Add event listeners to the document (or body) rather than window for better control
-        // These are always active to catch the *first* interaction
+        // General interaction events
         document.addEventListener('mousemove', handleMove, { passive: true }); 
-        document.addEventListener('wheel', handleWheel, { passive: false }); 
+        window.addEventListener('wheel', handleWheel, { passive: false }); 
+        
         document.addEventListener('touchstart', handleTouchStart, { passive: false });
         document.addEventListener('touchmove', handleTouchMove, { passive: false });
         document.addEventListener('touchend', handleTouchEnd, { passive: false });
 
         initializeCursorLinkHover(); 
         
-        // No initial startBallAutonomousMovement or mainAnimationLoop here.
-        // They will be triggered by the first user interaction.
+        // Handle desktop-specific mouseleave/focus for screensaver
+        if (!isMobileDevice) {
+            document.body.addEventListener('mouseleave', startBallAutonomousMovement); // Starts screensaver immediately on mouseleave
+            document.body.addEventListener('mouseenter', stopBallAutonomousMovement); // Stops screensaver on mouseenter
+            window.addEventListener('blur', startBallAutonomousMovement); // Activates screensaver on window blur
+            window.addEventListener('focus', stopBallAutonomousMovement); // Deactivates screensaver on window focus
+        } else {
+            // On mobile, start autonomous movement immediately on load
+            startBallAutonomousMovement();
+            // The touch events (touchstart, touchend) will then manage switching between user control and autonomous
+        }
+
+        // Initialize lastClientX/Y to current cursor position, adjusted for centering
+        const initialRect = customCursor.getBoundingClientRect();
+        lastClientX = initialRect.left + (cursorSize / 2);
+        lastClientY = initialRect.top + (cursorSize / 2);
+
+        // Start the main animation loop immediately
+        animationId = requestAnimationFrame(mainAnimationLoop);
       }
     })();
   </script>
