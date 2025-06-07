@@ -71,12 +71,12 @@
       /* Updated to lighter shades of white with more explicit stops */
       --background-gradient: radial-gradient(
         circle at center,
-        #ffffff 0%,   /* Pure white */
-        #fcfcfc 20%,   /* Very light off-white */
-        #f8f8f8 40%,   /* Another very light off-white */
-        #f5f5f5 60%,   /* Slightly darker off-white */
-        #f2f2f2 80%,   /* Another step */
-        #efefef 100%   /* Darkest off-white for transition end */
+        #ffffff 0%,    /* Pure white */
+        #fcfcfc 20%,    /* Very light off-white */
+        #f8f8f8 40%,    /* Another very light off-white */
+        #f5f5f5 60%,    /* Slightly darker off-white */
+        #f2f2f2 80%,    /* Another step */
+        #efefef 100%    /* Darkest off-white for transition end */
       );
       --animation-duration-fast: 15s;
       --animation-duration-slow: 40s;
@@ -164,7 +164,6 @@
     /* Custom cursor styles: Fixed position, small dot, smooth transitions */
     .custom-cursor {
       position: fixed;
-      /* Left and top are now directly controlled by JavaScript for precise positioning */
       left: 0;
       top: 0;
       width: 12px; /* Increased size for better visibility as a "ball" */
@@ -175,6 +174,9 @@
       z-index: 9999; /* Ensures it's always on top */
       transition: background-color 0.2s ease-out, opacity 0.2s ease-out; /* Smooth color and opacity changes */
       will-change: left, top, background-color, opacity; /* Performance hint for browser */
+      /* Initially hidden */
+      opacity: 0;
+      visibility: hidden;
     }
 
     /* Keyframe animation for the background gradient shift */
@@ -389,7 +391,7 @@
       
       .contact-text {
         font-size: 0.65rem; 
-        bottom: 8px;
+        bottom: 40px; /* Adjusted from 8px to 40px */
         right: 8px;
         gap: 8px; 
       }
@@ -448,7 +450,7 @@
       const primaryColors = [
         'hsl(0, 80%, 55%)',    // Vibrant Red
         'hsl(200, 100%, 40%)', // Intense Blue
-        'hsl(45, 80%, 50%)',  // Richer Golden Yellow
+        'hsl(45, 80%, 50%)',   // Richer Golden Yellow
         'hsl(140, 70%, 45%)'   // Lively Green
       ];
       let currentColorIndex = 0; 
@@ -472,6 +474,9 @@
 
       // Detect mobile device more reliably
       const isMobileDevice = /Mobi|Android/i.test(navigator.userAgent) || ('ontouchstart' in window);
+
+      // Flag to track if user has interacted at least once
+      let hasUserInteracted = false;
 
       // --- Main Animation Loop ---
       function mainAnimationLoop() {
@@ -602,6 +607,19 @@
 
       // Handles mousemove and touchmove to control the ball
       function handleMove(e) {
+        if (!hasUserInteracted) {
+          customCursor.style.opacity = '1';
+          customCursor.style.visibility = 'visible';
+          hasUserInteracted = true;
+          animationId = requestAnimationFrame(mainAnimationLoop); // Start the animation loop on first interaction
+          if (!isMobileDevice) {
+            document.body.addEventListener('mouseleave', startBallAutonomousMovement);
+            document.body.addEventListener('mouseenter', stopBallAutonomousMovement);
+            window.addEventListener('blur', startBallAutonomousMovement);
+            window.addEventListener('focus', stopBallAutonomousMovement);
+          }
+        }
+
         clearInactivityTimer(); // Any interaction resets the inactivity timer
 
         // If we're coming from an autonomous state, immediately stop it and revert appearance
@@ -629,6 +647,18 @@
       let initialTouchY = 0; // For tracking vertical swipe distance
 
       function handleWheel(e) {
+        if (!hasUserInteracted) {
+          customCursor.style.opacity = '1';
+          customCursor.style.visibility = 'visible';
+          hasUserInteracted = true;
+          animationId = requestAnimationFrame(mainAnimationLoop); // Start the animation loop on first interaction
+          if (!isMobileDevice) {
+            document.body.addEventListener('mouseleave', startBallAutonomousMovement);
+            document.body.addEventListener('mouseenter', stopBallAutonomousMovement);
+            window.addEventListener('blur', startBallAutonomousMovement);
+            window.addEventListener('focus', stopBallAutonomousMovement);
+          }
+        }
         e.preventDefault(); 
         clearInactivityTimer(); // Interaction resets timer
         
@@ -641,6 +671,12 @@
       }
 
       function handleTouchStart(e) {
+        if (!hasUserInteracted) {
+          customCursor.style.opacity = '1';
+          customCursor.style.visibility = 'visible';
+          hasUserInteracted = true;
+          animationId = requestAnimationFrame(mainAnimationLoop); // Start the animation loop on first interaction
+        }
         initialTouchY = e.touches[0].clientY;
         handleMove(e); // Use handleMove for initial position and velocity setup
       }
@@ -654,8 +690,7 @@
         // When touch ends, immediately switch to autonomous mode,
         // retaining the last velocity from touchmove
         startBallAutonomousMovement();
-        // The inactivity timer will naturally restart after this,
-        // or if the user doesn't touch again, the ball will continue bouncing.
+        startInactivityTimer(); // Mobile: Start inactivity timer after touch ends
       }
 
       function animateScrollEffect() {
@@ -726,45 +761,44 @@
       }
 
       // --- Initialization on DOM Ready ---
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', setupListeners);
-      } else {
-        setupListeners();
-      }
-
-      function setupListeners() {
-        cursorSize = customCursor.offsetWidth; 
-
-        // General interaction events
-        document.addEventListener('mousemove', handleMove, { passive: true }); 
-        window.addEventListener('wheel', handleWheel, { passive: false }); 
-        
-        document.addEventListener('touchstart', handleTouchStart, { passive: false });
-        document.addEventListener('touchmove', handleTouchMove, { passive: false });
-        document.addEventListener('touchend', handleTouchEnd, { passive: false });
-
-        initializeCursorLinkHover(); 
-        
-        // Handle desktop-specific mouseleave/focus for screensaver
+      document.addEventListener('DOMContentLoaded', () => {
+        // For non-mobile devices, start the screensaver timer immediately
         if (!isMobileDevice) {
-            document.body.addEventListener('mouseleave', startBallAutonomousMovement); // Starts screensaver immediately on mouseleave
-            document.body.addEventListener('mouseenter', stopBallAutonomousMovement); // Stops screensaver on mouseenter
-            window.addEventListener('blur', startBallAutonomousMovement); // Activates screensaver on window blur
-            window.addEventListener('focus', stopBallAutonomousMovement); // Deactivates screensaver on window focus
+            startInactivityTimer();
         } else {
-            // On mobile, start autonomous movement immediately on load
-            startBallAutonomousMovement();
-            // The touch events (touchstart, touchend) will then manage switching between user control and autonomous
+            // For mobile, make cursor visible on initial page load but stay in fixed position
+            customCursor.style.opacity = '1';
+            customCursor.style.visibility = 'visible';
         }
+        
+        // Add event listeners based on device type
+        if (!isMobileDevice) {
+            document.addEventListener('mousemove', handleMove);
+            document.addEventListener('wheel', handleWheel, { passive: false });
+        } else {
+            document.addEventListener('touchstart', handleTouchStart, { passive: false });
+            document.addEventListener('touchmove', handleTouchMove, { passive: false });
+            document.addEventListener('touchend', handleTouchEnd);
+        }
+        
+        initializeCursorLinkHover();
+      });
 
-        // Initialize lastClientX/Y to current cursor position, adjusted for centering
-        const initialRect = customCursor.getBoundingClientRect();
-        lastClientX = initialRect.left + (cursorSize / 2);
-        lastClientY = initialRect.top + (cursorSize / 2);
-
-        // Start the main animation loop immediately
-        animationId = requestAnimationFrame(mainAnimationLoop);
-      }
+      // Cleanup function to remove event listeners on window unload
+      window.addEventListener('unload', () => {
+        cancelAnimationFrame(animationId);
+        cancelAnimationFrame(rAFScroll);
+        clearTimeout(inactivityTimeoutId);
+        document.removeEventListener('mousemove', handleMove);
+        document.removeEventListener('wheel', handleWheel);
+        document.removeEventListener('touchstart', handleTouchStart);
+        document.removeEventListener('touchmove', handleTouchMove);
+        document.removeEventListener('touchend', handleTouchEnd);
+        document.body.removeEventListener('mouseleave', startBallAutonomousMovement);
+        document.body.removeEventListener('mouseenter', stopBallAutonomousMovement);
+        window.removeEventListener('blur', startBallAutonomousMovement);
+        window.removeEventListener('focus', stopBallAutonomousMovement);
+      });
     })();
   </script>
 </body>
